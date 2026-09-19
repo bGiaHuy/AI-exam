@@ -1,0 +1,181 @@
+{
+  "report_version": "Sprint 2.2A Correction Pass 1.3 (Corrected Evidence Edition)",
+  "manifest_created_at": "2026-09-14T18:55:00+07:00",
+  "checkpoint_info": {
+    "deployed_checkpoint_path": "model/weights/phone_detector_v5.pt",
+    "deployed_checkpoint_sha256": "23fa698727a49cb8ba7d260c1ac13f01d4d27e8726e97aa3d8fef992ad5e19c2",
+    "training_best_checkpoint_sha256": "23fa698727a49cb8ba7d260c1ac13f01d4d27e8726e97aa3d8fef992ad5e19c2",
+    "training_last_checkpoint_sha256": "1118a896828de3c6d78d03e10e8412f276a356de0a9405087baf7a718d787389",
+    "checkpoint_size_bytes": 19245082,
+    "architecture": "YOLO11s",
+    "final_resumed_run_input": "last.pt",
+    "initial_pretrained_checkpoint_status": "UNRESOLVED",
+    "training_resume_detected": true,
+    "resume_boundary_observed_before_epoch": 6,
+    "final_deployed_artifact": "phone_detector_v5.pt"
+  },
+  "training_parameters": {
+    "task": "detect",
+    "mode": "train",
+    "epochs": 60,
+    "training_history_epochs_recorded": 60,
+    "training_resumed": true,
+    "resume_evidence": "args.yaml specifies model/resume as last.pt; results.csv time column resets from 1219.98s at epoch 5 to 119.816s at epoch 6",
+    "imgsz": 960,
+    "batch": 6,
+    "optimizer": "auto",
+    "seed": 0,
+    "deterministic": true,
+    "close_mosaic": 10,
+    "save_period": -1,
+    "data_config_evidence_file": "training_data_phone.redacted.yaml",
+    "data_config_status": "EVIDENCE_ONLY_NOT_EXECUTABLE"
+  },
+  "dataset_summary": {
+    "name": "phone_merged",
+    "reconciliation_method": "corresponds by filename, count, and split structure (963 + 1000 + 998 = 2961 images; content hash per file across source ZIPs not individually audited)",
+    "class_count": 1,
+    "classes": {
+      "0": "phone"
+    },
+    "splits": {
+      "train": {
+        "images": 2434,
+        "labels": 2434,
+        "empty_labels": 0,
+        "annotated_labels": 2434,
+        "phone_boxes": 3042
+      },
+      "valid": {
+        "images": 382,
+        "labels": 382,
+        "empty_labels": 0,
+        "annotated_labels": 382,
+        "phone_boxes": 490
+      },
+      "test": {
+        "images": 145,
+        "labels": 145,
+        "empty_labels": 0,
+        "annotated_labels": 145,
+        "phone_boxes": 174
+      },
+      "total": {
+        "images": 2961,
+        "labels": 2961,
+        "phone_boxes": 3706
+      }
+    }
+  },
+  "source_roboflow_projects": [
+    {
+      "project_name": "mobilephone",
+      "project_url": "https://universe.roboflow.com/du-tran/mobilephone-vpgle",
+      "version": "v3",
+      "export_date": "2026-08-26 10:09am GMT",
+      "verification_date": "2026-09-14",
+      "license": "CC BY 4.0",
+      "license_source_file": "README.dataset.txt",
+      "attribution": "Roboflow user du-tran",
+      "images_contributed": 963,
+      "split_distribution": {
+        "train": 823,
+        "valid": 100,
+        "test": 40
+      }
+    },
+    {
+      "project_name": "mobilephone2",
+      "project_url": "https://universe.roboflow.com/du-tran/mobilephone2-lmw02",
+      "version": "v1",
+      "export_date": "2026-08-26 10:15am GMT",
+      "verification_date": "2026-09-14",
+      "license": "CC BY 4.0",
+      "license_source_file": "README.dataset.txt",
+      "attribution": "Roboflow user du-tran",
+      "images_contributed": 1000,
+      "split_distribution": {
+        "train": 801,
+        "valid": 175,
+        "test": 24
+      }
+    },
+    {
+      "project_name": "mobilephone3",
+      "project_url": "https://universe.roboflow.com/du-tran/mobilephone3",
+      "version": "v1",
+      "export_date": "2026-08-26 10:16am GMT",
+      "verification_date": "2026-09-14",
+      "license": "CC BY 4.0",
+      "license_source_file": "README.dataset.txt",
+      "attribution": "Roboflow user du-tran",
+      "images_contributed": 998,
+      "split_distribution": {
+        "train": 810,
+        "valid": 107,
+        "test": 81
+      }
+    }
+  ],
+  "training_metrics_extrema": {
+    "metric_tag": "TRAINING_VALIDATION_ONLY",
+    "max_precision": {
+      "epoch": 53,
+      "precision": 0.80397,
+      "recall": 0.66327,
+      "mAP50": 0.76711,
+      "mAP50_95": 0.45396
+    },
+    "max_recall": {
+      "epoch": 59,
+      "precision": 0.78275,
+      "recall": 0.70408,
+      "mAP50": 0.78326,
+      "mAP50_95": 0.47023
+    },
+    "max_mAP50": {
+      "epoch": 55,
+      "precision": 0.78802,
+      "recall": 0.68980,
+      "mAP50": 0.78578,
+      "mAP50_95": 0.46456
+    },
+    "max_mAP50_95": {
+      "epoch": 60,
+      "precision": 0.76217,
+      "recall": 0.68367,
+      "mAP50": 0.76915,
+      "mAP50_95": 0.47155
+    },
+    "final_epoch_60": {
+      "epoch": 60,
+      "precision": 0.76217,
+      "recall": 0.68367,
+      "mAP50": 0.76915,
+      "mAP50_95": 0.47155
+    },
+    "best_checkpoint_source_epoch_status": "BEST_CHECKPOINT_SOURCE_EPOCH_UNRESOLVED"
+  },
+  "leakage_auditing": {
+    "conducted_checks": [
+      "Exact-content SHA-256 hash collision between train, valid, and test (0 collisions detected)",
+      "Filename collision between train, valid, and test splits (0 collisions detected)",
+      "Test video frames filename overlap against phone_merged (0 collisions detected)"
+    ],
+    "unexamined_limitations": [
+      "Near-duplicate image similarity analysis (perceptual hashing)",
+      "Cross-frame correlation from identical source video sessions",
+      "Subject/scene/camera independence partitioning"
+    ],
+    "zero_leakage_claim_status": "STRICT_RESTRICTION_NO_ABSOLUTE_ZERO_LEAKAGE_CLAIM"
+  },
+  "multiv_and_test_data_role": {
+    "role": "external_challenge_previously_seen",
+    "training_involvement": "NONE",
+    "holdout_qualification": "NOT_QUALIFIED_AS_UNTOUCHED_HOLDOUT"
+  },
+  "blocker_status": {
+    "D-01_training_dataset_lineage": "CLOSED",
+    "D-02_independent_untouched_holdout_evaluation": "OPEN"
+  }
+}

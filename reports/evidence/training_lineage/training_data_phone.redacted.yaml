@@ -1,0 +1,13 @@
+# EVIDENCE_ONLY — NOT AN EXECUTABLE DATASET CONFIG
+# Snapshot cấu hình dataset lịch sử phục vụ đối soát bằng chứng lineage.
+# ĐÃ REDACT ĐƯỜNG DẪN CÁ NHÂN. KHÔNG DÙNG ĐỂ CHẠY TRỰC TIẾP TRÊN REPO CHÍNH.
+# Cấu hình thực thi cho evaluation harness nằm tại datasets/phone/data_phone.yaml.
+
+path: ./data and finetune 3/phone_merged
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 1
+names:
+  0: phone

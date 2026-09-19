@@ -1,0 +1,23 @@
+# ==============================================================================
+# Evidence Capture & Video Clip Storage Configuration
+# ==============================================================================
+
+evidence:
+  pre_window_sec: 5.0 # Video buffer before violation trigger
+  post_window_sec: 10.0 # Video buffer after violation trigger (total 15.0s clip)
+  total_clip_duration_sec: 15.0
+  cooldown_sec: 6.0 # Cooldown between triggers for same track and violation type
+
+  video_settings:
+    format: "mp4"
+    codec: "mp4v"
+    fps: 20
+    resolution: [640, 360]
+    draw_bounding_boxes: true
+    timestamp_watermark: true
+
+  storage:
+    local_dir: "data/evidence"
+    database_table: "incidents"
+    max_retention_days: 90
+    auto_cleanup_dismissed: false

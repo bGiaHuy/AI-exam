@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-14T13:10:46.530435+00:00",
+  "overall_status": "PASS",
+  "total_commands": 6,
+  "passed_commands": 6,
+  "failed_commands": 0,
+  "results": [
+    {
+      "id": "backend_regression_tests",
+      "command": ".venv\\Scripts\\python.exe -m unittest backend.tests.test_refactored_system",
+      "cwd": ".",
+      "start_time": "2026-09-14T13:10:27.568309+00:00",
+      "end_time": "2026-09-14T13:10:39.577196+00:00",
+      "duration_seconds": 12.009,
+      "exit_code": 0,
+      "stdout_artifact": "test_backend_output.txt",
+      "stderr_artifact": null,
+      "artifact_sha256": "1ce9099ce30e6bbb3dc6b8610339357f4452fe1812d1fc602e3a8c7f0b803924",
+      "status": "PASS"
+    },
+    {
+      "id": "evaluation_harness_tests",
+      "command": ".venv\\Scripts\\python.exe -m unittest scripts.evaluation.tests.test_evaluation_harness",
+      "cwd": ".",
+      "start_time": "2026-09-14T13:10:39.578778+00:00",
+      "end_time": "2026-09-14T13:10:41.515926+00:00",
+      "duration_seconds": 1.937,
+      "exit_code": 0,
+      "stdout_artifact": "test_harness_output.txt",
+      "stderr_artifact": null,
+      "artifact_sha256": "5a7f4677f28a22228f1ad25eeb31a6c51d769d02da7fefef16934cce235ce0a0",
+      "status": "PASS"
+    },
+    {
+      "id": "frontend_typecheck",
+      "command": "npx tsc --noEmit",
+      "cwd": ".",
+      "start_time": "2026-09-14T13:10:41.516446+00:00",
+      "end_time": "2026-09-14T13:10:43.639130+00:00",
+      "duration_seconds": 2.123,
+      "exit_code": 0,
+      "stdout_artifact": "tsc_output.txt",
+      "stderr_artifact": null,
+      "artifact_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "id": "frontend_production_build",
+      "command": "npm run build",
+      "cwd": ".",
+      "start_time": "2026-09-14T13:10:43.639130+00:00",
+      "end_time": "2026-09-14T13:10:46.348899+00:00",
+      "duration_seconds": 2.71,
+      "exit_code": 0,
+      "stdout_artifact": "build_output.txt",
+      "stderr_artifact": null,
+      "artifact_sha256": "dfe9e1d11ecf5a15349396df10d7884f1c139e0d1d940a8cae14cb44a4883fbd",
+      "status": "PASS"
+    },
+    {
+      "id": "verify_training_lineage",
+      "command": ".venv\\Scripts\\python.exe scripts/verify_training_lineage_handoff.py",
+      "cwd": ".",
+      "start_time": "2026-09-14T13:10:46.350496+00:00",
+      "end_time": "2026-09-14T13:10:46.409100+00:00",
+      "duration_seconds": 0.059,
+      "exit_code": 0,
+      "stdout_artifact": "verify_lineage_output.txt",
+      "stderr_artifact": null,
+      "artifact_sha256": "d5b2b613fc75960549eadd07839a22de72bfcd167ab2156a84c736e8954fb256",
+      "status": "PASS"
+    },
+    {
+      "id": "verify_report_consistency",
+      "command": ".venv\\Scripts\\python.exe scripts/verify_report_consistency.py",
+      "cwd": ".",
+      "start_time": "2026-09-14T13:10:46.409100+00:00",
+      "end_time": "2026-09-14T13:10:46.530435+00:00",
+      "duration_seconds": 0.121,
+      "exit_code": 0,
+      "stdout_artifact": "verify_consistency_output.txt",
+      "stderr_artifact": null,
+      "artifact_sha256": "135f1090101605d422a3f6f69c4efdbacf1fe9f3fcdbb0155c05468305bbdd57",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+# ==============================================================================
+# Violation Classification & Evidence Trigger Thresholds
+# ==============================================================================
+
+violations:
+  PHONE:
+    level: "red"
+    confidence_threshold: 0.35
+    trigger_evidence: true
+    description: "Sử dụng điện thoại di động trong phòng thi"
+
+  HEAD_TURNING:
+    level: "red"
+    duration_threshold_sec: 1.25
+    trigger_evidence: true
+    description: "Quay đầu nhìn bài hoặc đổi hướng nhìn kéo dài"
+
+  HEAD_TURNING_WARNING:
+    level: "yellow"
+    duration_threshold_sec: 0.50
+    trigger_evidence: false
+    description: "Cảnh báo tư thế nghi vấn (chưa đủ thời gian leo thang cờ đỏ)"

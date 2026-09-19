@@ -1,0 +1,10 @@
+# REPORT HANDOFF ARCHIVE SHA-256 CHECKSUM
+# Project: AI-Powered Automated Proctoring System (AI Exam Control)
+# Sprint: Sprint 4.0B — Final Evidence Semantics Correction & Report Handoff Packaging
+# Generated: 2026-09-14
+
+Filename: REPORT_HANDOFF_V0_1.zip
+Size: 113627 bytes (110.96 KB)
+SHA256: ceb570cfd75bdebcb71aa136e5a5a629e99c065e7a4270f0dfd88b16492b2ed3
+
+ceb570cfd75bdebcb71aa136e5a5a629e99c065e7a4270f0dfd88b16492b2ed3 *REPORT_HANDOFF_V0_1.zip

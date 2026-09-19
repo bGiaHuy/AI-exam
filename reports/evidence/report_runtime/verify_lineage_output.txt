@@ -1,0 +1,21 @@
+=== SPRINT 3.2A TRAINING LINEAGE HANDOFF VERIFICATION ===
+Target directory: C:\Users\Administrator\Documents\Codespace\aiexam\reports\evidence\training_lineage
+[OK] Directory contains exactly the 10 canonical files.
+[OK] artifact_hashes.csv integrity verified (61c78a5340955c41...).
+[OK] Verified payload: args.yaml (1801 bytes, hash: 1c5e63a7c2af544d...)
+[OK] Verified payload: HANDOFF_README.md (4117 bytes, hash: 7addcde2aa0d4333...)
+[OK] Verified payload: lineage_manifest.json (5812 bytes, hash: deceb7ae00ff0e04...)
+[OK] Verified payload: README_mobilephone2_v1.txt (1041 bytes, hash: 84a26eb48b0dd364...)
+[OK] Verified payload: README_mobilephone3_v1.txt (1033 bytes, hash: 24859b68bce0dd40...)
+[OK] Verified payload: README_mobilephone_v3.txt (1040 bytes, hash: bb5e34c4a52b49f1...)
+[OK] Verified payload: results.csv (7179 bytes, hash: 107d3c7ba661d679...)
+[OK] Verified payload: SPRINT_2_2A_CORRECTED_REPORT.md (22003 bytes, hash: a12bcbb9d2aa4d31...)
+[OK] Verified payload: training_data_phone.redacted.yaml (460 bytes, hash: 23c9b7d1918ffcef...)
+[OK] Manifest report_version confirmed: 'Sprint 2.2A Correction Pass 1.3 (Corrected Evidence Edition)'
+[OK] Blocker statuses in manifest: D-01=CLOSED, D-02=OPEN
+[OK] Checkpoint resume evidence confirmed (resumed before epoch 6, initial pretrained UNRESOLVED).
+[OK] Best checkpoint source epoch status: BEST_CHECKPOINT_SOURCE_EPOCH_UNRESOLVED.
+[OK] MultiV role confirmed: external_challenge_previously_seen.
+[OK] Redacted YAML verified as evidence-only (not treated as executable config).
+[OK] No unredacted personal filesystem paths found.
+=== SPRINT 3.2A VERIFICATION RESULT: PASS (All criteria satisfied) ===

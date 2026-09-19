@@ -1,0 +1,8 @@
+{
+  "phone_confidence": 0.35,
+  "posture_alert_seconds": 1.25,
+  "suspicion_threshold": 0.5,
+  "pre_roll_seconds": 5.0,
+  "post_roll_seconds": 10.0,
+  "cooldown_seconds": 6.0
+}

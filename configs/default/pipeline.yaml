@@ -1,0 +1,30 @@
+# ==============================================================================
+# AI Vision Pipeline & Detection Configuration
+# Minimal Scope: Vision Evidence Only (Phone & Posture)
+# Zero Examinee Identity / Face Recognition
+# ==============================================================================
+
+pipeline:
+  detection_fps: 30
+  tracking_fps: 30
+  frame_inference_interval_ms: 600
+  incident_debounce_sec: 6
+
+models:
+  cheating_detector:
+    path: "model/weights/yolo11m-pose.pt"
+    confidence_threshold: 0.35
+    iou_threshold: 0.45
+    input_size: [640, 640]
+
+  phone_detector:
+    path: "model/weights/phone_detector_v5.pt"
+    confidence_threshold: 0.35
+    iou_threshold: 0.45
+    input_size: [640, 640]
+
+  tracker:
+    algorithm: "ByteTrack"
+    track_thresh: 0.45
+    match_thresh: 0.80
+    track_buffer: 30

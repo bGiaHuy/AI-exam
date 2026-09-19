@@ -1,0 +1,20 @@
+{
+  "venvPath": "model",
+  "venv": ".venv",
+  "extraPaths": [
+    "model",
+    "model/.venv/Lib/site-packages"
+  ],
+  "include": [
+    "model"
+  ],
+  "executionEnvironments": [
+    {
+      "root": "model",
+      "extraPaths": [
+        "model",
+        "model/.venv/Lib/site-packages"
+      ]
+    }
+  ]
+}

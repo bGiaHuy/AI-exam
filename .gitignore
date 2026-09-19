@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+model/.venv/
+.venv/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Python cache & compiled files
+__pycache__/
+model/__pycache__/
+backend/**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment & logs
+*.log
+.env
+.env.local
+.DS_Store
+
+# Local SQLite databases, WAL, SHM & Backups
+*.db
+*.db-wal
+*.db-shm
+cheating_system_backup_*.db
+test_*.db
+
+# Runtime evidence directory
+data/evidence/*
+!data/evidence/.gitkeep
+
+# Runtime local settings (preserve example)
+backend/data/ai_settings.json
+!backend/data/ai_settings.example.json
+
+# Reference & archived research documents (do not commit to product release)
+*.docx
+"Bản sao của BÁO CÁO KHKT.docx"
+HUONG_DAN_VIET_BAO_CAO_KHKT.md
+
+# Temporary scratch & transfer handoff directories
+scratch/
+handoff/
+handoffv2/
+handoffv3/
+handoffv2.zip
+
+# Preserved examples
+!.env.example
+
+# Benchmark outputs
+data/benchmark_reports/
+
+# Evaluation & benchmark raw datasets (ignore large media & label archives, keep structure & schemas)
+datasets/**/images/**/*.jpg
+datasets/**/images/**/*.jpeg
+datasets/**/images/**/*.png
+datasets/**/labels/**/*.txt
+datasets/**/videos/**/*.mp4
+datasets/**/videos/**/*.avi
+datasets/**/videos/**/*.mov
+datasets/**/videos/**/*.mkv
+!datasets/**/.gitkeep
+!datasets/**/metadata/*.csv
+!datasets/**/annotations/*.csv
+!datasets/**/data_phone.yaml
