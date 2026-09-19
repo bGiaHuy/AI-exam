@@ -30,6 +30,7 @@ const DEFAULT_AI_SETTINGS: AISettings = {
 export default function App() {
   // Navigation: Only 2 essential view modes (Live Monitor & AI Settings)
   const [currentView, setCurrentView] = useState<ViewMode>('live-monitor');
+  const [activeSourceName, setActiveSourceName] = useState<string>("Webcam Giám Sát");
 
   // Core Configuration State
   const [aiSettings, setAiSettings] = useState<AISettings>(DEFAULT_AI_SETTINGS);
@@ -110,7 +111,7 @@ export default function App() {
       <TopNavBar
         currentView={currentView}
         onSelectView={setCurrentView}
-        activeSource="Camera Giám Sát"
+        activeSource={activeSourceName}
       />
 
       {/* Main Content Area */}
@@ -123,6 +124,7 @@ export default function App() {
             }}
             onConfirmIncident={handleConfirmIncident}
             onDismissIncident={handleDismissIncident}
+            onActiveSourceChange={setActiveSourceName}
           />
         )}
 

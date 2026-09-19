@@ -12,7 +12,8 @@ import {
   Eye, 
   EyeOff,
   ShieldCheck, 
-  ShieldAlert
+  ShieldAlert,
+  Camera
 } from 'lucide-react';
 import { Incident } from '../types';
 import { getIncidents, confirmIncident, resetSessionState } from '../services/api';
@@ -24,19 +25,30 @@ import {
   WebSocketDetectionPayload 
 } from '../services/aiModelService';
 
+export interface CameraDevice {
+  deviceId: string;
+  label: string;
+}
+
 interface StreamlinedDashboardProps {
   onOpenVideoModal: (incident: Incident) => void;
   onConfirmIncident?: (incidentId: string) => void;
   onDismissIncident?: (incidentId: string) => void;
+  onActiveSourceChange?: (sourceName: string) => void;
 }
 
 export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = ({
   onOpenVideoModal,
   onConfirmIncident,
-  onDismissIncident
+  onDismissIncident,
+  onActiveSourceChange
 }) => {
-  // Video Stream Source
+  // Video Stream Source & Camera Selection
   const [sourceType, setSourceType] = useState<'webcam' | 'file'>('webcam');
+  const [availableCameras, setAvailableCameras] = useState<CameraDevice[]>([]);
+  const [selectedCameraId, setSelectedCameraId] = useState<string>(() => {
+    return localStorage.getItem('ai_exam_selected_camera_id') || '';
+  });
   const [isMonitoring, setIsMonitoring] = useState(true);
   const [showOverlays, setShowOverlays] = useState(true);
   const [fps, setFps] = useState(15);
@@ -76,28 +88,105 @@ export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = 
   const [isPolling, setIsPolling] = useState(false);
   const [activeIncidentLevel, setActiveIncidentLevel] = useState<'normal' | 'yellow' | 'red'>('normal');
 
-  // 1. Initialize Webcam Stream
+  // Enumerate all connected video input devices
+  const updateCameraList = async () => {
+    if (!navigator.mediaDevices?.enumerateDevices) return [];
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices
+        .filter(d => d.kind === 'videoinput')
+        .map((d, index) => ({
+          deviceId: d.deviceId,
+          label: d.label || `Camera ${index + 1}`
+        }));
+      setAvailableCameras(videoDevices);
+      return videoDevices;
+    } catch (err) {
+      console.warn('[Dashboard] Lỗi liệt kê camera:', err);
+      return [];
+    }
+  };
+
+  // 1. Initialize Webcam Stream with device selection
   useEffect(() => {
+    let isCancelled = false;
+
     if (sourceType === 'webcam') {
       const startCamera = async () => {
         try {
           if (webcamStreamRef.current) {
             webcamStreamRef.current.getTracks().forEach(t => t.stop());
+            webcamStreamRef.current = null;
           }
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+
+          const constraints: MediaStreamConstraints = {
+            video: selectedCameraId 
+              ? { deviceId: { exact: selectedCameraId }, width: { ideal: 1280 }, height: { ideal: 720 } }
+              : { width: { ideal: 1280 }, height: { ideal: 720 } },
             audio: false
-          });
+          };
+
+          let stream: MediaStream;
+          try {
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+          } catch (deviceErr) {
+            console.warn('[Dashboard] Không thể mở camera đã chọn, thử camera mặc định:', deviceErr);
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+              audio: false
+            });
+          }
+
+          if (isCancelled) {
+            stream.getTracks().forEach(t => t.stop());
+            return;
+          }
+
           webcamStreamRef.current = stream;
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
             videoRef.current.play().catch(() => {});
           }
+
+          // Liệt kê danh sách camera sau khi đã được cấp quyền duyệt MediaDevices
+          const cams = await updateCameraList();
+          if (cams && cams.length > 0) {
+            const currentTrack = stream.getVideoTracks()[0];
+            const currentSettings = currentTrack?.getSettings();
+            const activeId = currentSettings?.deviceId || cams[0].deviceId;
+
+            if (!selectedCameraId || !cams.some(c => c.deviceId === selectedCameraId)) {
+              setSelectedCameraId(activeId);
+              localStorage.setItem('ai_exam_selected_camera_id', activeId);
+            }
+
+            const activeCam = cams.find(c => c.deviceId === (selectedCameraId || activeId));
+            const label = activeCam?.label || 'Webcam Giám Sát';
+            onActiveSourceChange?.(label);
+          } else {
+            onActiveSourceChange?.('Webcam Giám Sát');
+          }
         } catch (err) {
           console.warn('[Dashboard] Không thể mở webcam:', err);
         }
       };
+
       startCamera();
+
+      // Lắng nghe sự kiện cắm/rút webcam USB để tự cập nhật danh sách
+      const handleDeviceChange = () => {
+        updateCameraList();
+      };
+      navigator.mediaDevices?.addEventListener?.('devicechange', handleDeviceChange);
+
+      return () => {
+        isCancelled = true;
+        navigator.mediaDevices?.removeEventListener?.('devicechange', handleDeviceChange);
+        if (webcamStreamRef.current) {
+          webcamStreamRef.current.getTracks().forEach(t => t.stop());
+          webcamStreamRef.current = null;
+        }
+      };
     } else {
       if (webcamStreamRef.current) {
         webcamStreamRef.current.getTracks().forEach(t => t.stop());
@@ -107,13 +196,7 @@ export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = 
         videoRef.current.srcObject = null;
       }
     }
-
-    return () => {
-      if (webcamStreamRef.current) {
-        webcamStreamRef.current.getTracks().forEach(t => t.stop());
-      }
-    };
-  }, [sourceType]);
+  }, [sourceType, selectedCameraId]);
 
   // 2. High-Density WebSocket Ingestion Pipeline (15 FPS, Decoupled Recording & Inference)
   useEffect(() => {
@@ -260,9 +343,20 @@ export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = 
     if (!file || !videoRef.current) return;
     const url = URL.createObjectURL(file);
     setSourceType('file');
+    onActiveSourceChange?.(`Tập tin: ${file.name}`);
     videoRef.current.srcObject = null;
     videoRef.current.src = url;
     videoRef.current.play().catch(() => {});
+  };
+
+  // Handle switching camera device
+  const handleCameraChange = (deviceId: string) => {
+    setSelectedCameraId(deviceId);
+    localStorage.setItem('ai_exam_selected_camera_id', deviceId);
+    const cam = availableCameras.find(c => c.deviceId === deviceId);
+    if (cam) {
+      onActiveSourceChange?.(cam.label);
+    }
   };
 
   // 5. Operator Action Handlers
@@ -305,15 +399,46 @@ export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = 
 
         {/* Telemetry Header Bar */}
         <div className="h-11 px-3 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between text-xs">
-          {/* Left: Source Status */}
+          {/* Left: Source Status & Camera Selector */}
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 font-mono text-[11px]">
               <span className={`w-1.5 h-1.5 rounded-full ${wsConnected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
               {wsConnected ? 'LIVE' : 'DISCONNECTED'}
             </span>
-            <span className="text-zinc-300 font-medium">
-              {sourceType === 'webcam' ? 'Webcam Trực Tiếp' : 'Tập Tin Video Demo'}
-            </span>
+
+            {sourceType === 'webcam' ? (
+              <div className="flex items-center gap-1.5 bg-zinc-950 border border-zinc-750 rounded px-2 py-0.5">
+                <Camera className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                <select
+                  value={selectedCameraId}
+                  onChange={(e) => handleCameraChange(e.target.value)}
+                  className="bg-transparent text-zinc-200 text-xs font-mono focus:outline-none cursor-pointer max-w-[150px] sm:max-w-[210px] truncate"
+                  title="Chọn nguồn camera đầu vào"
+                >
+                  {availableCameras.length === 0 ? (
+                    <option value="" className="bg-zinc-900 text-zinc-400">Đang tìm camera...</option>
+                  ) : (
+                    availableCameras.map((cam, idx) => (
+                      <option key={cam.deviceId || idx} value={cam.deviceId} className="bg-zinc-900 text-zinc-200">
+                        {cam.label || `Camera ${idx + 1}`}
+                      </option>
+                    ))
+                  )}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => updateCameraList()}
+                  title="Làm mới danh sách camera"
+                  className="text-zinc-400 hover:text-zinc-200 transition-colors p-0.5 ml-0.5"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <span className="text-zinc-300 font-medium text-xs">
+                Tập Tin Video Demo
+              </span>
+            )}
           </div>
 
           {/* Right: Telemetry & Controls */}
