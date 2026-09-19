@@ -1,97 +1,100 @@
 @echo off
-chcp 65001 > nul
 setlocal enabledelayedexpansion
 
 title AI Exam Control - Automated Proctoring System
 cd /d "%~dp0"
 
 echo ================================================================================
-echo           HỆ THỐNG GIÁM SÁT THI CỬ THÔNG MINH - AI EXAM CONTROL
+echo           HE THONG GIAM SAT THI CU THONG MINH - AI EXAM CONTROL
 echo ================================================================================
 echo.
 
-:: 1. Kiểm tra Python
+:: 1. Kiem tra Python
 where python >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [ERROR] Không tìm thấy Python trên máy tính!
-    echo Vui lòng cài đặt Python (>= 3.10) và tích chọn "Add Python to PATH".
-    echo Tải tại: https://www.python.org/downloads/
-    pause
-    exit /b 1
-)
+if %errorlevel% equ 0 goto CHECK_NODE
+echo [ERROR] Khong tim thay Python tren he thong!
+echo Vui long cai dat Python 3.10 tro len va tich chon Add Python to PATH.
+echo Download tai: https://www.python.org/downloads/
+pause
+exit /b 1
 
-:: 2. Kiểm tra Node.js
+:CHECK_NODE
+:: 2. Kiem tra Node.js
 where node >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [ERROR] Không tìm thấy Node.js trên máy tính!
-    echo Vui lòng cài đặt Node.js (>= 18) để chạy giao diện Frontend.
-    echo Tải tại: https://nodejs.org/
-    pause
-    exit /b 1
-)
+if %errorlevel% equ 0 goto CHECK_VENV
+echo [ERROR] Khong tim thay Node.js tren he thong!
+echo Vui long cai dat Node.js 18 tro len de chay giao dien Frontend.
+echo Download tai: https://nodejs.org/
+pause
+exit /b 1
 
-:: 3. Kiểm tra môi trường ảo Python (.venv)
-if not exist ".venv\Scripts\python.exe" (
-    echo [INFO] Đang khởi tạo môi trường ảo Python (.venv)...
-    where uv >nul 2>nul
-    if %errorlevel% equ 0 (
-        uv venv .venv
-        echo [INFO] Đang cài đặt thư viện backend bằng uv...
-        uv pip install -r backend/requirements.txt --python .venv\Scripts\python.exe
-    ) else (
-        python -m venv .venv
-        echo [INFO] Đang cài đặt thư viện backend bằng pip (có thể mất vài phút)...
-        .venv\Scripts\python.exe -m pip install --upgrade pip
-        .venv\Scripts\python.exe -m pip install -r backend/requirements.txt
-    )
-    if %errorlevel% neq 0 (
-        echo [ERROR] Cài đặt thư viện backend thất bại. Vui lòng kiểm tra kết nối mạng.
-        pause
-        exit /b 1
-    )
-)
+:CHECK_VENV
+:: 3. Kiem tra moi truong ao Python
+if exist ".venv\Scripts\python.exe" goto CHECK_FRONTEND
 
-:: 4. Kiểm tra thư viện Frontend (node_modules)
-if not exist "node_modules" (
-    echo [INFO] Đang cài đặt thư viện frontend (npm install)...
-    call npm install
-    if %errorlevel% neq 0 (
-        echo [ERROR] Cài đặt npm thất bại. Vui lòng kiểm tra kết nối mạng.
-        pause
-        exit /b 1
-    )
-)
+echo [INFO] Dang khoi tao moi truong ao Python .venv...
+where uv >nul 2>nul
+if %errorlevel% neq 0 goto USE_PIP
 
-:: 5. Khởi chạy Backend FastAPI (Cổng 8000)
+:: Su dung uv neu co
+uv venv .venv
+echo [INFO] Dang cai dat thu vien backend bang uv...
+uv pip install -r backend/requirements.txt --python .venv\Scripts\python.exe
+goto VERIFY_VENV
+
+:USE_PIP
+:: Su dung python standard venv va pip
+python -m venv .venv
+echo [INFO] Dang cai dat thu vien backend bang pip...
+.venv\Scripts\python.exe -m pip install --upgrade pip
+.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
+
+:VERIFY_VENV
+if exist ".venv\Scripts\python.exe" goto CHECK_FRONTEND
+echo [ERROR] Cai dat moi truong backend that bai. Vui long kiem tra ket noi mang.
+pause
+exit /b 1
+
+:CHECK_FRONTEND
+:: 4. Kiem tra thu vien Frontend
+if exist "node_modules" goto LAUNCH_SERVICES
+
+echo [INFO] Dang cai dat thu vien frontend npm install...
+call npm install
+if %errorlevel% equ 0 goto LAUNCH_SERVICES
+echo [ERROR] Cai dat npm that bai. Vui long kiem tra ket noi mang.
+pause
+exit /b 1
+
+:LAUNCH_SERVICES
+:: 5. Khoi chay Backend FastAPI (Port 8000)
 echo.
-echo [1/3] Đang khởi động Backend FastAPI (Port 8000)...
-start "AI-Exam Backend [FastAPI:8000]" cmd /k "cd /d ""%~dp0"" && title AI-Exam Backend [FastAPI:8000] && .venv\Scripts\python.exe backend/main.py"
+echo [1/3] Dang khoi dong Backend FastAPI tai cong 8000...
+start "AI-Exam Backend [FastAPI:8000]" /D "%~dp0" cmd /k ".venv\Scripts\python.exe backend\main.py"
 
-:: Chờ 3 giây để Backend sẵn sàng
-timeout /t 3 /nobreak > nul
+:: Cho 3 giay de Backend san sang
+ping 127.0.0.1 -n 4 > nul
 
-:: 6. Khởi chạy Frontend Vite (Cổng 3000)
-echo [2/3] Đang khởi động Frontend Vite (Port 3000)...
-start "AI-Exam Frontend [Vite:3000]" cmd /k "cd /d ""%~dp0"" && title AI-Exam Frontend [Vite:3000] && npm run dev"
+:: 6. Khoi chay Frontend Vite (Port 3000)
+echo [2/3] Dang khoi dong Frontend Vite tai cong 3000...
+start "AI-Exam Frontend [Vite:3000]" /D "%~dp0" cmd /k "npm run dev"
 
-:: Chờ 2 giây để Frontend sẵn sàng
-timeout /t 2 /nobreak > nul
+:: Cho 2 giay de Frontend san sang
+ping 127.0.0.1 -n 3 > nul
 
-:: 7. Tự động mở trình duyệt Web
-echo [3/3] Đang mở trình duyệt tại http://localhost:3000...
+:: 7. Tu dong mo trinh duyet
+echo [3/3] Dang mo trinh duyet tai http://localhost:3000...
 start http://localhost:3000
 
 echo.
 echo ================================================================================
-echo   HỆ THỐNG ĐÃ KHỞI CHẠY THÀNH CÔNG!
+echo   HE THONG DA KHOI CHAY THANH CONG!
 echo.
-echo   * Giao diện Giám sát (Frontend) : http://localhost:3000
-echo   * API & Backend Service         : http://localhost:8000
+echo   * Giao dien Giam sat (Frontend) : http://localhost:3000
+echo   * API va Backend Service        : http://localhost:8000
 echo   * Swagger API Documentation     : http://localhost:8000/docs
 echo.
-echo   * Hai cửa sổ dòng lệnh (Backend & Frontend) đang chạy song song.
-echo   * Để dừng toàn bộ hệ thống, bạn có thể đóng 2 cửa sổ đó hoặc chạy file stop.bat
+echo   * Hai cua so dong lenh (Backend va Frontend) dang chay song song.
+echo   * De dung toan bo he thong, dong 2 cua so do hoac chay file stop.bat
 echo ================================================================================
 echo.
-
-pause
