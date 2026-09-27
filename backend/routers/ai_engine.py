@@ -874,8 +874,16 @@ def detect_frame(payload: FrameDetectionRequest):
             _last_observed_fps_by_source[source_id] = observed_acq_fps
     _last_frame_timestamp_by_source[source_id] = frame_timestamp
 
-    # 3. Feed raw frame into RingBuffer with verified frame timestamp
-    ring_buffer_service.push_frame(frame, timestamp=frame_timestamp)
+    # 3. Feed raw frame into RingBuffer with verified frame timestamp + source/session context
+    # NOTE: source_id and session_id MUST be passed so pre-roll frames are correctly
+    # matched when trigger_incident() filters by (source_id, session_id) to build the clip.
+    _active_sess_for_source = _active_ws_sessions.get(source_id) or _active_ws_session_id
+    ring_buffer_service.push_frame(
+        frame=frame,
+        timestamp=frame_timestamp,
+        source_id=source_id,
+        session_id=_active_sess_for_source
+    )
 
     det_engine = get_detector()
     if det_engine is None:
@@ -1002,13 +1010,21 @@ def detect_frame(payload: FrameDetectionRequest):
         vtype, conf_val, p_tid = red_alerts_to_trigger[0]
 
         # Trigger RingBuffer with multi-target cooldown (source_id, track_id, violation_type)
+        # session_id MUST be passed: cooldown key is (session_id, source_id, track_id, vtype)
+        # Without it all violations collide on key ("default", source_id, ...) and get blocked.
+        logger.info(
+            f"[AI_ENGINE] Leo thang cờ ĐỎ: {vtype} [Track {p_tid}] conf={conf_val:.1f} "
+            f"source={source_id} session={_active_sess_for_source} -> Kích hoạt RingBuffer clip"
+        )
         inc_id = ring_buffer_service.trigger_incident(
             violation_type=vtype,
             confidence=conf_val,
             source_id=source_id,
             track_id=p_tid,
             current_frame=frame,
-            level="red"
+            level="red",
+            session_id=_active_sess_for_source,
+            timestamp=frame_timestamp
         )
 
         if inc_id:
