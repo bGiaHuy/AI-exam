@@ -88,43 +88,43 @@ export const ProctorHeader: React.FC<ProctorHeaderProps> = ({
   const isSystemOnline = aiStatus?.status === 'ONLINE';
 
   return (
-    <header className="relative bg-white border-b border-[#DCE6F5] shadow-xs z-30 select-none overflow-hidden">
+    <header className="relative bg-white border-b border-[#DDE6F2] shadow-xs z-30 select-none overflow-hidden">
       {/* ========================================================================= */}
-      {/* TÂN LẬP DUAL-LAYER BACKGROUND WATERMARK SYSTEM                            */}
+      {/* TRẦN PHÚ - ĐÀ NẴNG DUAL-LAYER BACKGROUND WATERMARK SYSTEM                */}
       {/* ========================================================================= */}
-      {/* 1. Large Torch & Book Watermark (Biểu trưng Tri Thức Tân Lập) */}
+      {/* 1. Large School Emblem Watermark (Biểu trưng Tri Thức Trần Phú) */}
       <div 
         className="absolute pointer-events-none z-0"
         style={{
-          top: '-110px',
-          left: '42%',
+          top: '-70px',
+          left: '38%',
           transform: 'translateX(-50%)',
-          width: '420px',
-          height: '420px',
-          opacity: 0.08,
+          width: '320px',
+          height: '240px',
+          opacity: 0.07,
         }}
       >
         <img 
-          src="/assets/tanlap/torch-book-watermark.svg" 
-          alt="Biểu trưng ngọn đuốc và trang sách Tân Lập" 
+          src="/assets/tranphu/school-watermark.svg" 
+          alt="Biểu trưng trường THPT Trần Phú" 
           className="w-full h-full object-contain"
         />
       </div>
 
-      {/* 2. Top-Right Leaf Pattern (Cành nguyệt quế tri thức) */}
+      {/* 2. Top-Right Da Nang Skyline Pattern (Đường chân trời TP. Đà Nẵng) */}
       <div 
         className="absolute pointer-events-none z-0"
         style={{
-          top: '-60px',
+          top: '-35px',
           right: '-20px',
-          width: '380px',
-          height: '180px',
-          opacity: 0.14,
+          width: '450px',
+          height: '140px',
+          opacity: 0.16,
         }}
       >
         <img 
-          src="/assets/tanlap/header-leaf-pattern.svg" 
-          alt="Họa tiết lá cách điệu Tân Lập" 
+          src="/assets/tranphu/danang-skyline.svg" 
+          alt="Đường chân trời TP. Đà Nẵng" 
           className="w-full h-full object-contain"
         />
       </div>
@@ -139,11 +139,11 @@ export const ProctorHeader: React.FC<ProctorHeaderProps> = ({
           <div 
             onClick={() => onSelectView('live-monitor')} 
             className="cursor-pointer shrink-0 transition-transform hover:scale-105 active:scale-95"
-            title="THPT Tân Lập - Bàn giám sát AI"
+            title="THPT Trần Phú - Đà Nẵng / Bàn giám sát AI"
           >
             <img 
-              src="/assets/tanlap/school-logo.png" 
-              alt="Logo THPT Tân Lập" 
+              src="/assets/tranphu/school-logo.png" 
+              alt="Logo THPT Trần Phú - Đà Nẵng" 
               className="w-13 h-13 sm:w-16 sm:h-16 object-contain drop-shadow-xs"
             />
           </div>
@@ -151,16 +151,16 @@ export const ProctorHeader: React.FC<ProctorHeaderProps> = ({
           {/* Institutional Typography Lockup */}
           <div className="flex flex-col justify-center select-text">
             {/* School Name: Bold Red Uppercase */}
-            <h1 className="font-extrabold text-[#EF3340] tracking-tight uppercase text-sm sm:text-base md:text-lg leading-tight">
-              TRƯỜNG THPT TÂN LẬP
+            <h1 className="font-extrabold text-[#E8465A] tracking-tight uppercase text-sm sm:text-base md:text-lg leading-tight">
+              TRƯỜNG THPT TRẦN PHÚ - ĐÀ NẴNG
             </h1>
             {/* System Name: Navy Blue Uppercase */}
-            <h2 className="font-extrabold text-[#173B7A] tracking-tight uppercase text-base sm:text-lg md:text-xl leading-tight mt-0.5">
+            <h2 className="font-extrabold text-[#163474] tracking-tight uppercase text-base sm:text-lg md:text-xl leading-tight mt-0.5">
               HỆ THỐNG GIÁM SÁT THI BẰNG AI
             </h2>
             {/* Institutional Motto: Muted Blue-Gray */}
             <p className="font-semibold text-[#64748B] text-[10px] sm:text-[11px] md:text-xs tracking-wider uppercase mt-0.5">
-              KỶ CƯƠNG • TRUNG THỰC • CHẤT LƯỢNG <span className="text-slate-400 font-normal">|</span> ĐAN PHƯỢNG - HÀ NỘI
+              ĐÀ NẴNG - THÀNH PHỐ ĐÁNG SỐNG • TRUNG THỰC - TRÁCH NHIỆM - KHÁT VỌNG
             </p>
           </div>
         </div>
@@ -168,8 +168,8 @@ export const ProctorHeader: React.FC<ProctorHeaderProps> = ({
         {/* RIGHT STATUS & CONTROL AREA */}
         <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 shrink-0">
           {/* Clock Card */}
-          <div className="flex items-center gap-2.5 bg-white border border-[#DCE6F5] px-3 sm:px-3.5 py-1.5 rounded-xl shadow-xs">
-            <Clock className="w-4 h-4 text-[#173B7A] shrink-0" />
+          <div className="flex items-center gap-2.5 bg-white border border-[#DDE6F2] px-3 sm:px-3.5 py-1.5 rounded-xl shadow-xs">
+            <Clock className="w-4 h-4 text-[#163474] shrink-0" />
             <div className="flex flex-col text-left">
               <span className="font-mono font-bold text-xs sm:text-sm text-slate-800 leading-none">
                 {timeStr || '11:31:40 UTC'}
@@ -183,14 +183,14 @@ export const ProctorHeader: React.FC<ProctorHeaderProps> = ({
           {/* System Status Badge (Pill) */}
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-xs transition-colors ${
             isSystemOnline
-              ? 'bg-[#E8F8F0] border-[#A7F3D0] text-[#16B364]'
-              : 'bg-amber-50 border-amber-200 text-[#F59E0B]'
+              ? 'bg-[#E8F8F0] border-[#A7F3D0] text-[#1FB45B]'
+              : 'bg-amber-50 border-amber-200 text-[#F2B34C]'
           }`}>
             <span className="flex h-2 w-2 relative">
               {isSystemOnline && (
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#16B364] opacity-75" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1FB45B] opacity-75" />
               )}
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${isSystemOnline ? 'bg-[#16B364]' : 'bg-[#F59E0B]'}`} />
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${isSystemOnline ? 'bg-[#1FB45B]' : 'bg-[#F2B34C]'}`} />
             </span>
             <span className="tracking-wide uppercase text-[11px] sm:text-xs whitespace-nowrap">
               {isSystemOnline ? '((•)) HỆ THỐNG ĐANG HOẠT ĐỘNG' : 'HỆ THỐNG CHỜ KẾT NỐI'}
@@ -206,8 +206,8 @@ export const ProctorHeader: React.FC<ProctorHeaderProps> = ({
                 title="Cấu hình độ nhạy AI"
                 className={`p-2 rounded-xl border transition-colors shadow-xs cursor-pointer ${
                   currentView === 'ai-settings'
-                    ? 'bg-[#2344B6] text-white border-[#2344B6]'
-                    : 'bg-white hover:bg-gray-50 border-[#DCE6F5] text-gray-700'
+                    ? 'bg-[#1C49B6] text-white border-[#1C49B6]'
+                    : 'bg-white hover:bg-gray-50 border-[#DDE6F2] text-gray-700'
                 }`}
               >
                 <Settings className="w-4 h-4" />
@@ -218,20 +218,20 @@ export const ProctorHeader: React.FC<ProctorHeaderProps> = ({
             <div className="relative">
               <button
                 onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
-                className="flex items-center gap-2 bg-white hover:bg-gray-50 border border-[#DCE6F5] px-3 py-1.5 rounded-xl shadow-xs transition-colors text-xs font-semibold text-slate-700 cursor-pointer"
+                className="flex items-center gap-2 bg-white hover:bg-gray-50 border border-[#DDE6F2] px-3 py-1.5 rounded-xl shadow-xs transition-colors text-xs font-semibold text-slate-700 cursor-pointer"
               >
-                <div className="w-6 h-6 rounded-full bg-[#2344B6] text-white flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 rounded-full bg-[#1C49B6] text-white flex items-center justify-center shrink-0">
                   <User className="w-3.5 h-3.5" />
                 </div>
-                <span className="hidden sm:inline">Giám thị Tân Lập</span>
+                <span className="hidden sm:inline">Giám thị Trần Phú</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${isAdminMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Admin Dropdown Menu */}
               {isAdminMenuOpen && (
-                <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl border border-[#DCE6F5] shadow-lg py-1.5 z-50 text-xs">
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl border border-[#DDE6F2] shadow-lg py-1.5 z-50 text-xs">
                   <div className="px-3 py-1.5 border-b border-gray-100 text-gray-500 text-[11px]">
-                    Đăng nhập: <strong className="text-slate-800">giamthi@thpt-tanlap.edu.vn</strong>
+                    Đăng nhập: <strong className="text-slate-800">giamthi@thpt-tranphu-danang.edu.vn</strong>
                   </div>
                   <button
                     onClick={() => {

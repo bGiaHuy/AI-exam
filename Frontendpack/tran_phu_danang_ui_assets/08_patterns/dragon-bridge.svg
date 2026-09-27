@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 180">
+<g fill="none" stroke="#9FBCEB" stroke-width="7" opacity="0.95" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M42 130 H860"/>
+  <path d="M100 130 C170 70 250 60 330 130"/>
+  <path d="M330 130 C400 70 495 60 565 130"/>
+  <path d="M565 130 C630 70 725 62 800 130"/>
+  <path d="M160 130 V104 M205 130 V88 M250 130 V79 M295 130 V88"/>
+  <path d="M390 130 V98 M445 130 V82 M500 130 V76 M545 130 V89"/>
+  <path d="M630 130 V98 M680 130 V84 M735 130 V77 M780 130 V92"/>
+  <path d="M96 95 C104 84 116 83 123 92 C130 101 126 112 117 115 C111 117 105 120 100 126"/>
+</g>
+</svg>

@@ -1,0 +1,140 @@
+{
+  "reference_board": {
+    "width": 1536,
+    "height": 1024
+  },
+  "project": "THPT Trần Phú - Đà Nẵng / Hệ thống giám sát thi bằng AI",
+  "layout": {
+    "header": "full width banner with school branding and Da Nang skyline/wave",
+    "sidebar_left": "190-210px wide, dark navy gradient, icon nav, Da Nang decorative illustration at bottom",
+    "top_controls": "single horizontal row of live state, FPS, violations, layout selector, upload button, AI toggle, time and system health",
+    "camera_grid": "3 desktop cards, gap 12-16px, equal heights",
+    "incident_sidebar": "vertical list on right or as separate column in full UI",
+    "table_area": "below camera cards for student list / incidents"
+  },
+  "colors": {
+    "primary_blue": "#1C49B6",
+    "navy": "#163474",
+    "red": "#E8465A",
+    "green": "#1FB45B",
+    "amber": "#F2B34C",
+    "background": "#F7FAFF",
+    "surface": "#FFFFFF",
+    "border": "#DDE6F2",
+    "skyline_blue": "#B7CBEF"
+  },
+  "files": {
+    "01_branding/brand-header-group.png": [
+      1507,
+      237
+    ],
+    "01_branding/school-logo-reference.png": [
+      169,
+      137
+    ],
+    "01_branding/school-name-lockup.png": [
+      378,
+      137
+    ],
+    "01_branding/system-title-lockup.png": [
+      374,
+      137
+    ],
+    "01_branding/header-wave-danang.png": [
+      577,
+      137
+    ],
+    "02_sidebar/sidebar-full-reference.png": [
+      194,
+      629
+    ],
+    "03_controls/top-status-controls-row.png": [
+      1282,
+      118
+    ],
+    "03_controls/status-live.png": [
+      180,
+      80
+    ],
+    "03_controls/fps-acq.png": [
+      109,
+      80
+    ],
+    "03_controls/fps-ai.png": [
+      95,
+      80
+    ],
+    "03_controls/violation-count.png": [
+      184,
+      80
+    ],
+    "03_controls/camera-layout-selector.png": [
+      132,
+      80
+    ],
+    "03_controls/upload-demo-button.png": [
+      115,
+      80
+    ],
+    "03_controls/ai-frame-toggle.png": [
+      158,
+      80
+    ],
+    "03_controls/time-card.png": [
+      124,
+      80
+    ],
+    "03_controls/system-health-badge.png": [
+      164,
+      80
+    ],
+    "04_camera_cards/camera-card-violation.png": [
+      291,
+      308
+    ],
+    "04_camera_cards/camera-card-normal.png": [
+      283,
+      308
+    ],
+    "04_camera_cards/camera-card-offline.png": [
+      280,
+      308
+    ],
+    "05_incident_cards/incident-card-critical.png": [
+      411,
+      94
+    ],
+    "05_incident_cards/incident-card-warning.png": [
+      411,
+      91
+    ],
+    "05_incident_cards/incident-card-illegal.png": [
+      411,
+      116
+    ],
+    "06_table/table-component-reference.png": [
+      864,
+      130
+    ],
+    "07_badges_icons/badges-tags-reference.png": [
+      411,
+      128
+    ],
+    "07_badges_icons/icons-reference.png": [
+      863,
+      90
+    ],
+    "08_patterns/danang-pattern-assets-reference.png": [
+      411,
+      91
+    ]
+  },
+  "implementation_notes": [
+    "Logo chính thức dùng file school-logo-original.png.",
+    "PNG trong pack là visual reference; agent phải recreate bằng component HTML/CSS/React.",
+    "Các thẻ camera phải dùng video thật và AI overlay thật, không ghép ảnh.",
+    "Giữ nhận diện Đà Nẵng nhẹ nhàng: skyline, cầu, wave footer/header.",
+    "Không để pattern lấn nội dung; opacity của motif nền nên ở mức thấp.",
+    "Bố cục ưu tiên: sidebar trái, content chính giữa, panel sự cố riêng."
+  ]
+}

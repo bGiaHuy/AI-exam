@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --primary-blue: #2344B6;
-  --navy: #173B7A;
-  --alert-red: #EF3340;
-  --success-green: #16B364;
-  --warning-amber: #F59E0B;
+  --primary-blue: #1C49B6;
+  --navy: #163474;
+  --alert-red: #E8465A;
+  --success-green: #1FB45B;
+  --warning-amber: #F2B34C;
   --bg: #F7FAFF;
   --card: #FFFFFF;
-  --border: #DCE6F5;
-  --muted-blue: #9DB9EA;
+  --border: #DDE6F2;
+  --muted-blue: #B7CBEF;
 }
 
 @layer base {
