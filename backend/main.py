@@ -22,6 +22,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
+
 # Ensure models and database are registered
 from database import engine, Base
 from routers import incidents, settings, ai_engine
@@ -41,15 +42,30 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# CORS Configuration
+
+@app.on_event("startup")
+def on_startup():
+    """Initialize camera manager on first app startup (DB worker remains lazy on first real write)."""
+    from routers.ai_engine import _ensure_camera_manager_initialized
+    _ensure_camera_manager_initialized()
+
+# CORS Configuration (Restricted Origins, no wildcard with credentials)
+cors_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+]
+extra_origins = os.getenv("ALLOWED_ORIGINS", "").strip()
+if extra_origins:
+    for o in extra_origins.split(","):
+        o_clean = o.strip()
+        if o_clean and o_clean != "*" and o_clean not in cors_origins:
+            cors_origins.append(o_clean)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

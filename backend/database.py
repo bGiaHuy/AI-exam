@@ -11,9 +11,14 @@ import os
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Database path resolution: stores cheating_system.db in project root
+# Database path resolution: supports AIEXAM_ISOLATED_DB or DATABASE_URL override
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "cheating_system.db")
+_env_db = os.getenv("AIEXAM_ISOLATED_DB")
+if not _env_db and os.getenv("DATABASE_URL"):
+    _url = os.getenv("DATABASE_URL", "")
+    if _url.startswith("sqlite:///"):
+        _env_db = _url[len("sqlite:///"):]
+DB_PATH = os.path.abspath(_env_db) if _env_db else os.path.join(BASE_DIR, "cheating_system.db")
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH}")
 
 # SQLite Engine with multi-thread access for FastAPI

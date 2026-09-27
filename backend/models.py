@@ -35,8 +35,17 @@ class Incident(Base):
     # Primary identifier: inc_{timestamp}_{uuid}
     id = Column(String(100), primary_key=True, index=True)
 
-    # Physical video/camera source identifier (e.g. 'webcam_local', 'cam_01', 'demo_video')
-    source_id = Column(String(100), nullable=False, default="webcam_local", index=True)
+    # Physical video/camera source identifier (e.g. 'cam1', 'cam2', 'webcam_local')
+    source_id = Column(String(100), nullable=False, default="cam1", index=True)
+
+    # Human-readable source label (e.g. 'Góc trước', 'Góc bên')
+    source_label = Column(String(100), nullable=True, default="Camera 1")
+
+    # Ingestion transport type ('browser_ws', 'usb', 'rtsp', 'synthetic')
+    source_type = Column(String(50), nullable=True, default="browser_ws")
+
+    # Session identifier
+    session_id = Column(String(100), nullable=True, index=True)
 
     # Temporary tracker ID assigned by ByteTrack across sequential frames (nullable)
     track_id = Column(Integer, nullable=True, index=True)
@@ -44,10 +53,10 @@ class Incident(Base):
     # Violation contract: only 'PHONE' or 'HEAD_TURNING'
     violation_type = Column(String(50), nullable=False)
 
-    # Confidence score (float 0.0 - 100.0)
-    # - For PHONE: YOLO model detection confidence
-    # - For HEAD_TURNING: Heuristic posture anomaly score
-    confidence = Column(Float, nullable=False, default=90.0)
+    # Canonical confidence score (float 0.0 - 1.0)
+    # - Normalized probability range [0.0, 1.0] across all violation types
+    # - Legacy percentages (>1.0) are normalized upon DB write
+    confidence = Column(Float, nullable=False, default=0.90)
 
     # Severity level: 'yellow' (suspicious warning) or 'red' (confirmed flag)
     level = Column(String(20), nullable=False, default="red")

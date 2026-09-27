@@ -207,7 +207,7 @@ class TestRefactoredSystem17(unittest.TestCase):
             self.assertEqual(migrated_row[0], "inc_leg_1")
             self.assertEqual(migrated_row[1], "P301")
             self.assertEqual(migrated_row[2], "PHONE")
-            self.assertEqual(migrated_row[3], 92.5)
+            self.assertAlmostEqual(migrated_row[3], 0.925, places=4)
             conn.close()
 
             # 3. Test Idempotency: Run migration AGAIN on already-migrated DB
@@ -251,7 +251,7 @@ class TestRefactoredSystem17(unittest.TestCase):
             self.assertEqual(inc.violation_type, "PHONE")
             self.assertEqual(inc.level, "red")
             self.assertEqual(inc.track_id, 301)
-            self.assertEqual(inc.confidence, 93.5)
+            self.assertEqual(inc.confidence, 0.935)  # Normalized to canonical probability [0, 1]
             db.delete(inc)
             db.commit()
         finally:
@@ -1303,14 +1303,18 @@ class TestRefactoredSystem17(unittest.TestCase):
         self.assertNotIn("/api/detect/frame", paths)
 
         # 2. Test mode: ENABLE_TEST_ENDPOINTS=true mounts the endpoint
-        os.environ["ENABLE_TEST_ENDPOINTS"] = "true"
-        importlib.reload(main)
-        test_client = TestClient(main.app)
+        try:
+            os.environ["ENABLE_TEST_ENDPOINTS"] = "true"
+            importlib.reload(main)
+            test_client = TestClient(main.app)
 
-        res_test_enabled = test_client.post("/api/test/trigger_incident")
-        self.assertEqual(res_test_enabled.status_code, 200, "Test trigger endpoint must return 200 when enabled")
-        openapi_test = test_client.get("/openapi.json").json().get("paths", {})
-        self.assertIn("/api/test/trigger_incident", openapi_test)
+            res_test_enabled = test_client.post("/api/test/trigger_incident")
+            self.assertEqual(res_test_enabled.status_code, 200, "Test trigger endpoint must return 200 when enabled")
+            openapi_test = test_client.get("/openapi.json").json().get("paths", {})
+            self.assertIn("/api/test/trigger_incident", openapi_test)
+        finally:
+            os.environ.pop("ENABLE_TEST_ENDPOINTS", None)
+            importlib.reload(main)
 
     # ----------------------------------------------------------------------
     # 30. Canonical incident vocabulary and confidence semantics (Sprint 3.1)
@@ -1444,7 +1448,10 @@ class TestRefactoredSystem17(unittest.TestCase):
                 self.assertNotIn(b"SQLite format 3", res_trav.content, f"Payload {payload} must not leak DB content")
 
             # 4. Verify default OpenAPI schema excludes test, deprecated ingest, and legacy clips endpoints
-            res_openapi = self.client.get("/openapi.json")
+            from starlette.testclient import TestClient
+            import main as main_module
+            clean_client = TestClient(main_module.app)
+            res_openapi = clean_client.get("/openapi.json")
             self.assertEqual(res_openapi.status_code, 200)
             paths = res_openapi.json().get("paths", {})
             self.assertNotIn("/api/test/trigger_incident", paths, "Test endpoint must not appear in default OpenAPI")
@@ -1453,7 +1460,6 @@ class TestRefactoredSystem17(unittest.TestCase):
 
             # 5. When explicitly enabled via ENABLE_LEGACY_CLIPS, legacy clips route functions with basename defense
             from fastapi import FastAPI
-            from starlette.testclient import TestClient
             from starlette.staticfiles import StaticFiles
             import routers.ai_engine as ai_engine_module
 

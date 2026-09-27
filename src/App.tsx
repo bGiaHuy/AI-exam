@@ -7,19 +7,25 @@ import {
 import { 
   getAISettings, 
   updateAISettings, 
-  confirmIncident 
+  confirmIncident,
+  deleteIncident 
 } from './services/api';
 
 // Core Components
-import { TopNavBar } from './components/TopNavBar';
+import { ProctorHeader } from './components/proctoring/ProctorHeader';
+import { NavigationSidebar } from './components/proctoring/NavigationSidebar';
 import { StreamlinedProctorDashboard } from './components/StreamlinedProctorDashboard';
 import { AISettingsView } from './components/AISettingsView';
 
 // Modals
 import { VideoEvidenceModal } from './components/modals/VideoEvidenceModal';
 
+// Demo Mode & Watermark
+import { DemoWatermark } from './components/demo/DemoWatermark';
+import { DEMO_CONFIG } from './config/demoConfig';
+
 const DEFAULT_AI_SETTINGS: AISettings = {
-  phone_confidence: 0.35,
+  phone_confidence: 0.55,
   posture_alert_seconds: 1.25,
   suspicion_threshold: 0.50,
   pre_roll_seconds: 5.0,
@@ -30,7 +36,15 @@ const DEFAULT_AI_SETTINGS: AISettings = {
 export default function App() {
   // Navigation: Only 2 essential view modes (Live Monitor & AI Settings)
   const [currentView, setCurrentView] = useState<ViewMode>('live-monitor');
-  const [activeSourceName, setActiveSourceName] = useState<string>("Webcam Giám Sát");
+
+  // Guard navigation in demo mode
+  const handleSelectView = (view: ViewMode) => {
+    if (DEMO_CONFIG.isDemo && view === 'ai-settings') {
+      showToast('Cấu hình AI bị khóa trong phiên bản Demo');
+      return;
+    }
+    setCurrentView(view);
+  };
 
   // Core Configuration State
   const [aiSettings, setAiSettings] = useState<AISettings>(DEFAULT_AI_SETTINGS);
@@ -90,6 +104,16 @@ export default function App() {
     }
   };
 
+  const handleDeleteIncident = async (incidentId: string) => {
+    try {
+      await deleteIncident(incidentId);
+      showToast('Đã xóa tệp video sự cố thành công');
+    } catch (err) {
+      console.warn('[App] Lỗi xóa video sự cố:', err);
+      showToast('Lỗi khi xóa video sự cố');
+    }
+  };
+
   const handleSaveSettings = async (newCfg: AISettings) => {
     setAiSettings(newCfg);
     try {
@@ -106,55 +130,66 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-zinc-950 text-zinc-100 antialiased font-sans select-none">
-      {/* Streamlined Top Navigation Header */}
-      <TopNavBar
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#F7FAFF] text-slate-800 antialiased font-sans select-none">
+      {/* Permanent Demo Watermark Bar & Overlay */}
+      <DemoWatermark />
+
+      {/* THPT Tân Lập Institutional Header */}
+      <ProctorHeader
         currentView={currentView}
-        onSelectView={setCurrentView}
-        activeSource={activeSourceName}
+        onSelectView={handleSelectView}
+        activeSource="Camera Giám Sát"
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
-        {currentView === 'live-monitor' && (
-          <StreamlinedProctorDashboard
-            onOpenVideoModal={(inc) => {
-              setSelectedVideoIncident(inc);
-              setIsVideoModalOpen(true);
-            }}
-            onConfirmIncident={handleConfirmIncident}
-            onDismissIncident={handleDismissIncident}
-            onActiveSourceChange={setActiveSourceName}
-          />
-        )}
+      {/* Main Workspace: Left Navigation Sidebar + Center Camera Content */}
+      <div className="flex-1 flex overflow-hidden relative">
+        <NavigationSidebar
+          currentView={currentView}
+          onSelectView={handleSelectView}
+        />
 
-        {currentView === 'ai-settings' && (
-          <div className="flex-1 flex flex-col overflow-hidden bg-zinc-950">
-            <div className="p-3 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between px-6">
-              <span className="text-xs font-mono font-semibold text-zinc-300">
-                CẤU HÌNH ĐỘ NHẠY & THAM SỐ GHI BẰNG CHỨNG AI
-              </span>
-              <button
-                onClick={() => setCurrentView('live-monitor')}
-                className="px-3 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-medium transition-all border border-zinc-700"
-              >
-                ← Quay Lại Giám Sát
-              </button>
+        {/* Main Content Area */}
+        <main className="flex-1 flex flex-col overflow-hidden relative bg-[#F7FAFF]">
+          {currentView === 'live-monitor' && (
+            <StreamlinedProctorDashboard
+              onOpenVideoModal={(inc) => {
+                setSelectedVideoIncident(inc);
+                setIsVideoModalOpen(true);
+              }}
+              onConfirmIncident={handleConfirmIncident}
+              onDismissIncident={handleDismissIncident}
+              onDeleteIncident={handleDeleteIncident}
+            />
+          )}
+
+          {currentView === 'ai-settings' && (
+            <div className="flex-1 flex flex-col overflow-hidden bg-[#F7FAFF]">
+              <div className="p-3 bg-white border-b border-[#DCE6F5] flex items-center justify-between px-6 shadow-2xs">
+                <span className="text-xs font-mono font-bold text-[#173B7A] uppercase tracking-tight">
+                  CẤU HÌNH ĐỘ NHẠY & THAM SỐ GHI BẰNG CHỨNG AI
+                </span>
+                <button
+                  onClick={() => setCurrentView('live-monitor')}
+                  className="px-3 py-1.5 rounded-lg bg-[#2344B6] hover:bg-[#173B7A] text-white text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                >
+                  ← Quay Lại Giám Sát
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 bg-white max-w-4xl mx-auto my-4 rounded-xl border border-[#DCE6F5] shadow-sm w-full">
+                <AISettingsView
+                  settings={aiSettings}
+                  onSaveSettings={handleSaveSettings}
+                />
+              </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-6">
-              <AISettingsView
-                settings={aiSettings}
-                onSaveSettings={handleSaveSettings}
-              />
-            </div>
-          </div>
-        )}
-      </main>
+          )}
+        </main>
+      </div>
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-16 right-6 z-50 px-3.5 py-1.5 rounded-md bg-zinc-900 border border-zinc-700 shadow-xl text-xs text-white font-mono flex items-center gap-2 backdrop-blur animate-in fade-in slide-in-from-top-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="fixed top-24 right-6 z-50 px-4 py-2 rounded-xl bg-white border border-[#DCE6F5] shadow-lg text-xs text-slate-800 font-sans font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+          <div className="w-2 h-2 rounded-full bg-[#16B364] animate-pulse" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -164,6 +199,7 @@ export default function App() {
         isOpen={isVideoModalOpen}
         incident={selectedVideoIncident}
         onClose={() => setIsVideoModalOpen(false)}
+        onDeleteVideo={handleDeleteIncident}
       />
     </div>
   );

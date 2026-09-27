@@ -1,0 +1,143 @@
+{
+  "run_id": "sprint32b_r2_20260917_001625",
+  "schema_version": "1.0",
+  "description": "Production database immutable integrity guard (cheating_system.db, -wal, -shm)",
+  "project_root": "C:\\Users\\Administrator\\Documents\\Codespace\\aiexam",
+  "baseline": {
+    "recorded_at": "2026-09-17T00:16:25.803799+00:00",
+    "files": {
+      "cheating_system.db": {
+        "exists": true,
+        "size_bytes": 77824,
+        "mtime_ns": 1789603350287201900,
+        "mtime_iso": "2026-09-17T00:02:30.287202+00:00",
+        "ctime_ns": 1789346741826649600,
+        "ctime_iso": "2026-09-14T00:45:41.826650+00:00",
+        "sha256": "dca92ac7ea0be816ca41fb00b25af73dce18a632e6756b53fb3a519ecd30c499"
+      },
+      "cheating_system.db-wal": {
+        "exists": true,
+        "size_bytes": 0,
+        "mtime_ns": 1789603550208775600,
+        "mtime_iso": "2026-09-17T00:05:50.208776+00:00",
+        "ctime_ns": 1789603550208775600,
+        "ctime_iso": "2026-09-17T00:05:50.208776+00:00",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cheating_system.db-shm": {
+        "exists": true,
+        "size_bytes": 32768,
+        "mtime_ns": 1789603865391443400,
+        "mtime_iso": "2026-09-17T00:11:05.391443+00:00",
+        "ctime_ns": 1789603550208775600,
+        "ctime_iso": "2026-09-17T00:05:50.208776+00:00",
+        "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+      }
+    }
+  },
+  "checkpoints": [
+    {
+      "step_id": "SNAPSHOT",
+      "timestamp": "2026-09-17T00:16:25.944323+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-01",
+      "timestamp": "2026-09-17T00:16:29.513703+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-02",
+      "timestamp": "2026-09-17T00:16:30.241658+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-03",
+      "timestamp": "2026-09-17T00:16:45.517036+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-04",
+      "timestamp": "2026-09-17T00:16:48.794117+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-05",
+      "timestamp": "2026-09-17T00:16:51.393970+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-06",
+      "timestamp": "2026-09-17T00:16:54.810054+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-07",
+      "timestamp": "2026-09-17T00:16:56.430131+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-08",
+      "timestamp": "2026-09-17T00:16:58.066682+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-09",
+      "timestamp": "2026-09-17T00:17:01.723517+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-10",
+      "timestamp": "2026-09-17T00:17:04.789845+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-11",
+      "timestamp": "2026-09-17T00:17:23.853054+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-12",
+      "timestamp": "2026-09-17T00:18:28.357530+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-13",
+      "timestamp": "2026-09-17T00:19:32.901577+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-14",
+      "timestamp": "2026-09-17T00:19:33.824550+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    },
+    {
+      "step_id": "STEP-15",
+      "timestamp": "2026-09-17T00:19:35.001974+00:00",
+      "status": "UNTOUCHED",
+      "issues": []
+    }
+  ],
+  "final": {
+    "timestamp": "2026-09-17T00:19:35.059539+00:00",
+    "status": "UNTOUCHED",
+    "total_checkpoints": 16,
+    "summary": "Các thuộc tính được guard theo dõi không thay đổi giữa baseline và final checkpoint."
+  },
+  "overall_status": "PASSED_UNTOUCHED"
+}

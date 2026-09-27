@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { ViewMode } from '../types';
 import { aiModelService, AIStatusResponse } from '../services/aiModelService';
+import { DEMO_CONFIG } from '../config/demoConfig';
 
 interface TopNavBarProps {
   currentView: ViewMode;
@@ -110,19 +111,21 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
           </span>
         </div>
 
-        {/* AI Sensitivity Settings Toggle Button */}
-        <button
-          onClick={() => onSelectView(currentView === 'ai-settings' ? 'live-monitor' : 'ai-settings')}
-          title="Cấu hình độ nhạy AI"
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-xs font-medium transition-colors ${
-            currentView === 'ai-settings'
-              ? 'bg-zinc-800 text-white border-zinc-600'
-              : 'bg-zinc-900 hover:bg-zinc-850 border-zinc-800 text-zinc-300'
-          }`}
-        >
-          <Sliders className="w-3.5 h-3.5 text-zinc-400" />
-          <span className="hidden md:inline text-xs">Cấu Hình AI</span>
-        </button>
+        {/* AI Sensitivity Settings Toggle Button (Hidden in Demo mode) */}
+        {!DEMO_CONFIG.isDemo && (
+          <button
+            onClick={() => onSelectView(currentView === 'ai-settings' ? 'live-monitor' : 'ai-settings')}
+            title="Cấu hình độ nhạy AI"
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded border text-xs font-medium transition-colors ${
+              currentView === 'ai-settings'
+                ? 'bg-zinc-800 text-white border-zinc-600'
+                : 'bg-zinc-900 hover:bg-zinc-850 border-zinc-800 text-zinc-300'
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5 text-zinc-400" />
+            <span className="hidden md:inline text-xs">Cấu Hình AI</span>
+          </button>
+        )}
 
         {/* Fullscreen Toggle */}
         <button

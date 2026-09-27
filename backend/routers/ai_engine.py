@@ -40,7 +40,7 @@ except ImportError:
     TORCH_AVAILABLE = False
 import re
 import math
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, status, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from database import get_db
@@ -51,11 +51,17 @@ from schemas import (
     FrameDetectionRequest,
     SessionResetResponse,
     TestTriggerIncidentResponse,
-    SessionTelemetryResponse
+    SessionTelemetryResponse,
+    CameraModeRequest,
+    CameraModeResponse,
+    CameraSourceInfo,
+    CameraSystemStatusResponse
 )
 from services.ring_buffer import ring_buffer_service, EVIDENCE_DIR
 from services.temporal_tracker import temporal_posture_tracker
 from services.inference_worker import inference_buffer, inference_worker
+from services.camera_manager import camera_manager
+from services.camera_source import redact_url
 
 logger = logging.getLogger("ai_engine")
 router = APIRouter(tags=["AI Vision Engine"])
@@ -65,12 +71,60 @@ deprecated_router = APIRouter(tags=["Deprecated Ingest"])
 # Regex for source_id and session_id validation: alphanumeric, dash, underscore, dot (1..64 chars)
 ID_PATTERN = re.compile(r"^[a-zA-Z0-9_\-\.]{1,64}$")
 
-# Strict Single-Session Lock (Sprint 1.2B)
+
+def is_demo_read_only() -> bool:
+    return os.getenv("DEMO_READ_ONLY", "false").strip().lower() in ("true", "1", "yes")
+
+
+def verify_local_loopback(request: Request):
+    """
+    Restricts administrative operations to local loopback deployment in the absence of full RBAC.
+    """
+    client_host = request.client.host if request.client else ""
+    if client_host not in ("127.0.0.1", "::1", "testclient", "localhost"):
+        logger.warning(f"[ACCESS_GUARD] Blocked non-local administrative request from host '{client_host}'")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Administrative action restricted to local loopback deployment."
+        )
+
+
+def verify_write_allowed(request: Request):
+    """
+    Guards administrative and mutation operations:
+    1. Blocks with 403 Forbidden if DEMO_READ_ONLY is active.
+    2. Restricts access to local loopback deployment.
+    """
+    if is_demo_read_only():
+        logger.warning("[ACCESS_GUARD] Blocked mutation: DEMO_READ_ONLY is active.")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Action prohibited in read-only demo mode (DEMO_READ_ONLY)."
+        )
+    verify_local_loopback(request)
+
+
+# Multi-Source & Session State (Sprint 3.2 Dual-Camera)
 _active_ws_session_id: Optional[str] = None
+_active_ws_sessions: Dict[str, str] = {}  # norm_source_id -> session_id
 _session_mutex = threading.Lock()
 _latest_session_telemetry: Optional[Dict[str, Any]] = None
 _server_session_telemetry_history: Dict[str, Dict[str, Any]] = {}
 _live_session_telemetry: Dict[str, Dict[str, Any]] = {}
+_camera_manager_initialized = False
+
+
+def _ensure_camera_manager_initialized():
+    """
+    Lazily initialize the camera manager on first use.
+    This prevents thread spawning and model loading during test module import.
+    Call this from endpoints that need camera state, or from app startup.
+    """
+    global _camera_manager_initialized
+    if not _camera_manager_initialized:
+        _camera_manager_initialized = True
+        camera_manager.initialize()
+
 
 
 def reset_ai_session_state(session_id: Optional[str] = None):
@@ -105,14 +159,16 @@ def reset_ai_session_state(session_id: Optional[str] = None):
         temporal_posture_tracker.reset_session(session_id)
         inference_buffer.reset_session(session_id)
         ring_buffer_service.reset_session(session_id)
+        camera_manager.reset_session(session_id)
     else:
         temporal_posture_tracker.clear()
         inference_buffer.reset_session(None)
+        camera_manager.reset_session(None)
 
     logger.info(f"[SESSION_ISOLATION] Successfully completed state isolation for session={session_id}")
 
 
-@router.post("/session/reset", response_model=SessionResetResponse)
+@router.post("/session/reset", response_model=SessionResetResponse, dependencies=[Depends(verify_write_allowed)])
 def api_reset_session(session_id: Optional[str] = None):
     """Explicitly reset and isolate AI session state for the active session."""
     global _active_ws_session_id
@@ -323,16 +379,28 @@ async def websocket_ingest(
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid session_id (must match ^[a-zA-Z0-9_\\-\\.]{1,64}$)")
         return
 
-    # 2. Strict Single-Session Lock (Sprint 1.2B)
+    # 2. Strict Session Lock (Sprint 1.2B Single-Session / Sprint 3.2 Per-Source Multi-Camera)
+    norm_source_id = "cam1" if source_id in ("webcam_local", "default", "legacy_single") else source_id
     is_current_session_owner = False
     with _session_mutex:
         global _active_ws_session_id
-        if _active_ws_session_id is not None:
-            logger.warning(f"[WS_INGEST] Rejected concurrent session '{active_session_id}': Active session is '{_active_ws_session_id}'")
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Another ingestion session is currently active")
-            return
-        _active_ws_session_id = active_session_id
-        is_current_session_owner = True
+        if camera_manager.mode == "SINGLE_CAMERA":
+            if _active_ws_session_id is not None:
+                logger.warning(f"[WS_INGEST] Rejected concurrent session '{active_session_id}': Active session is '{_active_ws_session_id}'")
+                await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Another ingestion session is currently active")
+                return
+            _active_ws_session_id = active_session_id
+            _active_ws_sessions[norm_source_id] = active_session_id
+            is_current_session_owner = True
+        else:
+            if norm_source_id in _active_ws_sessions:
+                logger.warning(f"[WS_INGEST] Rejected concurrent session '{active_session_id}' for source '{norm_source_id}': Active session is '{_active_ws_sessions[norm_source_id]}'")
+                await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason=f"Another ingestion session for {norm_source_id} is currently active")
+                return
+            _active_ws_sessions[norm_source_id] = active_session_id
+            if _active_ws_session_id is None:
+                _active_ws_session_id = active_session_id
+            is_current_session_owner = True
 
     await websocket.accept()
     loop = asyncio.get_running_loop()
@@ -354,22 +422,26 @@ async def websocket_ingest(
         if payload.get("session_id") != active_session_id:
             return
         try:
-            stats = inference_buffer.get_session_stats(active_session_id)
-            inference_buffer.record_result_sent(active_session_id)
-            stats["results_sent"] += 1
+            if camera_manager.mode == "DUAL_CAMERA":
+                cam_source = camera_manager.get_source(norm_source_id)
+                stats = cam_source.inference_slot.get_stats() if cam_source else {}
+            else:
+                stats = inference_buffer.get_session_stats(active_session_id)
+                inference_buffer.record_result_sent(active_session_id)
+                stats["results_sent"] += 1
 
             payload["server_packets_received"] = server_packets_received
             payload["server_frames_decoded"] = server_frames_decoded
             payload["server_received_frames"] = server_frames_decoded
-            payload["inference_submitted_frames"] = stats["submitted"]
-            payload["inference_superseded_frames"] = stats["superseded"]
-            payload["inference_processed_frames"] = stats["processed"]
-            payload["processed_inference_frames"] = stats["processed"]
-            payload["inference_pending_frames"] = stats["pending"]
-            payload["pending_inference_frames"] = stats["pending"]
-            payload["result_messages_sent"] = stats["results_sent"]
-            payload["detection_results_sent"] = stats["results_sent"]
-            payload["detected_objects"] = stats["detected_objects"]
+            payload["inference_submitted_frames"] = stats.get("submitted", 0)
+            payload["inference_superseded_frames"] = stats.get("superseded", 0)
+            payload["inference_processed_frames"] = stats.get("processed", 0)
+            payload["processed_inference_frames"] = stats.get("processed", 0)
+            payload["inference_pending_frames"] = stats.get("pending", 0)
+            payload["pending_inference_frames"] = stats.get("pending", 0)
+            payload["result_messages_sent"] = stats.get("results_sent", 0)
+            payload["detection_results_sent"] = stats.get("results_sent", 0)
+            payload["detected_objects"] = stats.get("detected_objects", 0)
             payload["first_decoded_monotonic"] = first_server_mono
             payload["last_decoded_monotonic"] = last_server_mono
 
@@ -481,23 +553,36 @@ async def websocket_ingest(
                 "gaps_gt_250ms": gaps_gt_250ms,
             }
 
-            # 🔴 PIPELINE 1: RECORDING (RingBuffer) - Immediate non-blocking push using server monotonic clock
-            ring_buffer_service.push_frame(
-                frame=frame,
-                timestamp=server_received_monotonic,
-                sequence_id=seq_id,
-                session_id=active_session_id
-            )
+            if camera_manager.mode == "DUAL_CAMERA":
+                cam_source = camera_manager.get_source(norm_source_id)
+                if cam_source is None:
+                    cam_source = camera_manager._create_source(norm_source_id, f"Camera {norm_source_id}", "browser_ws", "")
+                    camera_manager.register_custom_source(cam_source)
+                cam_source.session_id = active_session_id
+                cam_source.push_frame(
+                    frame=frame,
+                    timestamp=server_received_monotonic,
+                    sequence_id=seq_id,
+                    callback=on_inference_result
+                )
+            else:
+                # 🔴 PIPELINE 1: RECORDING (RingBuffer) - Immediate non-blocking push using server monotonic clock
+                ring_buffer_service.push_frame(
+                    frame=frame,
+                    timestamp=server_received_monotonic,
+                    sequence_id=seq_id,
+                    session_id=active_session_id
+                )
 
-            # 🟡 PIPELINE 2: INFERENCE (Single-Slot Zero-Backlog Buffer) using server monotonic clock
-            inference_buffer.push_latest(
-                source_id=source_id,
-                session_id=active_session_id,
-                sequence_id=seq_id,
-                timestamp=server_received_monotonic,
-                frame=frame,
-                callback=on_inference_result
-            )
+                # 🟡 PIPELINE 2: INFERENCE (Single-Slot Zero-Backlog Buffer) using server monotonic clock
+                inference_buffer.push_latest(
+                    source_id=source_id,
+                    session_id=active_session_id,
+                    sequence_id=seq_id,
+                    timestamp=server_received_monotonic,
+                    frame=frame,
+                    callback=on_inference_result
+                )
 
     except WebSocketDisconnect:
         logger.info(f"[WS_INGEST] Client disconnected normally: source={source_id}, session={active_session_id}")
@@ -521,7 +606,13 @@ async def websocket_ingest(
                 p95 = round(sorted_int[min(len(sorted_int) - 1, int(len(sorted_int) * 0.95))], 1)
                 max_int = round(sorted_int[-1], 1)
 
-            final_stats = inference_buffer.get_session_stats(active_session_id)
+            if camera_manager.mode == "DUAL_CAMERA":
+                cam_source = camera_manager.get_source(norm_source_id)
+                final_stats = cam_source.inference_slot.get_stats() if cam_source else {
+                    "submitted": 0, "superseded": 0, "processed": 0, "pending": 0, "results_sent": 0, "detected_objects": 0
+                }
+            else:
+                final_stats = inference_buffer.get_session_stats(active_session_id)
             inv_i4 = (server_frames_decoded <= server_packets_received)
             inv_i5 = (final_stats["submitted"] <= server_frames_decoded)
             inv_i6 = (final_stats["processed"] + final_stats["superseded"] + final_stats["pending"] == final_stats["submitted"])
@@ -579,12 +670,124 @@ async def websocket_ingest(
             logger.info(f"[WS_INGEST] Session Telemetry Summary: {_latest_session_telemetry}")
 
             with _session_mutex:
-                if _active_ws_session_id == active_session_id:
-                    _active_ws_session_id = None
+                _active_ws_sessions.pop(norm_source_id, None)
+                if camera_manager.mode == "SINGLE_CAMERA":
+                    if _active_ws_session_id == active_session_id:
+                        _active_ws_session_id = None
+                else:
+                    if _active_ws_session_id == active_session_id:
+                        _active_ws_session_id = next(iter(_active_ws_sessions.values()), None)
             reset_ai_session_state(active_session_id)
             logger.info(f"[WS_INGEST] Cleaned up active session resources: session={active_session_id}")
 
 
+# Active preview connections tracking for disconnect cleanup audit
+_active_preview_tasks = set()
+_preview_tasks_lock = threading.Lock()
+
+def get_active_preview_count() -> int:
+    with _preview_tasks_lock:
+        return len(_active_preview_tasks)
+
+
+@router.websocket("/ws/preview")
+async def websocket_preview(
+    websocket: WebSocket,
+    source_id: str = "cam1",
+    fps: Optional[float] = None
+):
+    """
+    Dedicated Low-Latency WebSocket JPEG Preview Stream (Sprint 3.2B):
+    - Independent from /api/ws/ingest.
+    - Emits latest JPEG preview frame at configurable FPS (default 10 FPS).
+    - Drops stale frames naturally without accumulating queue backlog.
+    - Clean disconnect cleanup without affecting camera source.
+    - Zero credential leakage.
+    """
+    if not source_id or not ID_PATTERN.match(source_id):
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid source_id")
+        return
+
+    await websocket.accept()
+    norm_source_id = "cam1" if source_id in ("webcam_local", "default", "legacy_single") else source_id
+
+    task_id = f"{norm_source_id}_{id(websocket)}_{time.time()}"
+    with _preview_tasks_lock:
+        _active_preview_tasks.add(task_id)
+
+    init_source = camera_manager.get_source(norm_source_id)
+    if init_source:
+        init_source.add_preview_subscriber()
+
+    default_preview_fps = float(os.getenv("PREVIEW_FPS", "10.0"))
+    target_fps = fps if (fps and 1.0 <= fps <= 20.0) else default_preview_fps
+    interval = 1.0 / target_fps
+
+    last_sent_seq = -1
+    last_reported_status = None
+    last_sent_detections_len = 0
+
+    try:
+        while True:
+            source = camera_manager.get_source(norm_source_id)
+            if source is None:
+                await websocket.send_text(json.dumps({
+                    "type": "status",
+                    "source_id": norm_source_id,
+                    "status": "OFFLINE",
+                    "timestamp": time.time()
+                }))
+                await asyncio.sleep(0.5)
+                continue
+
+            current_status = source.status.value
+            if current_status != last_reported_status:
+                await websocket.send_text(json.dumps({
+                    "type": "status",
+                    "source_id": norm_source_id,
+                    "status": current_status,
+                    "timestamp": time.time()
+                }))
+                last_reported_status = current_status
+
+            if current_status not in ("ONLINE", "DEGRADED"):
+                await asyncio.sleep(0.2)
+                continue
+
+            seq, ts, jpeg_bytes, detections, level = source.get_latest_preview()
+            if seq > last_sent_seq and jpeg_bytes:
+                last_sent_seq = seq
+
+                # Send binary JPEG with 16-byte header: (int64 seq_id, double timestamp)
+                header = struct.pack(">qd", seq, ts)
+                binary_msg = header + jpeg_bytes
+                await websocket.send_bytes(binary_msg)
+                source.record_preview_transmitted(len(binary_msg))
+
+                # Send detection update if there are detections, non-normal status, or to clear stale detections
+                if detections or level != "normal" or last_sent_detections_len > 0:
+                    last_sent_detections_len = len(detections)
+                    await websocket.send_text(json.dumps({
+                        "type": "detections",
+                        "source_id": norm_source_id,
+                        "sequence_id": seq,
+                        "timestamp": ts,
+                        "level": level,
+                        "detections": detections
+                    }))
+
+            await asyncio.sleep(interval)
+
+    except WebSocketDisconnect:
+        logger.debug(f"[WS_PREVIEW] Client disconnected from source {norm_source_id}")
+    except Exception as err:
+        logger.debug(f"[WS_PREVIEW] Preview stream ended for source {norm_source_id}: {err}")
+    finally:
+        with _preview_tasks_lock:
+            _active_preview_tasks.discard(task_id)
+        fin_source = camera_manager.get_source(norm_source_id)
+        if fin_source:
+            fin_source.remove_preview_subscriber()
 
 
 @router.get("/stream")
@@ -597,6 +800,28 @@ def mjpeg_video_stream():
         generate_mjpeg_stream(),
         media_type="multipart/x-mixed-replace; boundary=frame"
     )
+
+
+# ==============================================================================
+# CAMERA SYSTEM & MULTI-SOURCE MANAGEMENT (Sprint 3.2)
+# ==============================================================================
+@router.get("/camera/mode", response_model=CameraModeResponse)
+def get_camera_mode():
+    """Lấy chế độ giám sát camera hiện tại (SINGLE_CAMERA hoặc DUAL_CAMERA)."""
+    return CameraModeResponse(mode=camera_manager.mode)
+
+
+@router.post("/camera/mode", response_model=CameraModeResponse, dependencies=[Depends(verify_write_allowed)])
+def set_camera_mode(payload: CameraModeRequest):
+    """Thay đổi chế độ camera (SINGLE_CAMERA hoặc DUAL_CAMERA)."""
+    new_mode = camera_manager.set_mode(payload.mode)
+    return CameraModeResponse(mode=new_mode)
+
+
+@router.get("/camera/sources", response_model=CameraSystemStatusResponse)
+def get_camera_sources():
+    """Lấy danh sách camera đang hoạt động và trạng thái telemetry chi tiết."""
+    return camera_manager.get_system_status()
 
 
 @deprecated_router.post(

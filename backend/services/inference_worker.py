@@ -115,6 +115,13 @@ class SingleSlotInferenceBuffer:
             self._ensure_session_locked(session_id)["submitted"] += 1
             self._new_frame_event.set()
 
+        # Lazy-start inference worker on first frame submission
+        try:
+            if "inference_worker" in globals() and inference_worker is not None:
+                inference_worker.start()
+        except Exception:
+            pass
+
     def pop_latest(self, timeout: float = 0.05) -> Optional[Dict[str, Any]]:
         """Pop the latest frame for inference, clearing the slot."""
         if not self._new_frame_event.wait(timeout=timeout):
@@ -443,4 +450,4 @@ class InferenceWorker:
 # Global single-slot buffer and worker instances
 inference_buffer = SingleSlotInferenceBuffer()
 inference_worker = InferenceWorker(inference_buffer)
-inference_worker.start()
+# Lazy start: started on demand when first frame is submitted via push_latest or explicitly started

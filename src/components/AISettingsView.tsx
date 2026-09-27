@@ -34,7 +34,7 @@ export const AISettingsView: React.FC<AISettingsViewProps> = ({ settings, onSave
 
   const handleResetDefaults = () => {
     setConfig({
-      phone_confidence: 0.35,
+      phone_confidence: 0.55,
       posture_alert_seconds: 1.25,
       suspicion_threshold: 0.50,
       pre_roll_seconds: 5.0,
@@ -109,7 +109,7 @@ export const AISettingsView: React.FC<AISettingsViewProps> = ({ settings, onSave
           />
           <div className="flex justify-between text-[10px] font-mono text-zinc-500">
             <span>10% (Nhạy cao)</span>
-            <span>Mặc định: 35%</span>
+            <span>Mặc định: 55% (Chuẩn 50% - 60%)</span>
             <span>90% (Nghiêm ngặt)</span>
           </div>
         </div>

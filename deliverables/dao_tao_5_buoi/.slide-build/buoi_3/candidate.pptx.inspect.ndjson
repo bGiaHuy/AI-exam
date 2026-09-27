@@ -1,0 +1,104 @@
+{"kind":"deck","id":"pr/urasfh","name":"Deck"}
+{"kind":"layout","layoutId":"e29ff6b4-225c-4a4b-be10-624c4f2e8cb4","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"3816fea4-ccfc-440e-904d-5a3501e463b8","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/4vvcdv","slide":1,"title":"BUỔI 3","textShapes":5}
+{"kind":"textbox","id":"sh/rat8jixk","slide":1,"text":"BUỔI 3","textPreview":"BUỔI 3","textChars":6,"textLines":1,"bbox":[70,64,240,38]}
+{"kind":"textbox","id":"sh/sb29s3y5","slide":1,"text":"Pose, tracking và hành vi theo thời gian","textPreview":"Pose, tracking và hành vi theo thời gian","textChars":40,"textLines":1,"bbox":[70,136,980,160]}
+{"kind":"textbox","id":"sh/tcbql8fq","slide":1,"text":"Từ keypoint của từng frame đến một sự kiện có start và end","textPreview":"Từ keypoint của từng frame đến một sự kiện có start và end","textChars":58,"textLines":1,"bbox":[72,316,850,86]}
+{"kind":"shape","id":"sh/il0rmtg3","slide":1,"bbox":[72,454,850,0]}
+{"kind":"textbox","id":"sh/j698fyxo","slide":1,"text":"Vẽ đúng hai pipeline điện thoại/quay đầu và gán nhãn một sự kiện theo khoảng thời gian.","textPreview":"Vẽ đúng hai pipeline điện thoại/quay đầu và gán nhãn một sự kiện theo khoảng thời gian.","textChars":87,"textLines":1,"bbox":[72,478,880,100]}
+{"kind":"textbox","id":"sh/47i9o3y9","slide":1,"text":"AI EXAM CONTROL · HỌC QUA ARTIFACT CỦA PROJECT","textPreview":"AI EXAM CONTROL · HỌC QUA ARTIFACT CỦA PROJECT","textChars":46,"textLines":1,"bbox":[72,642,800,26]}
+{"kind":"notes","id":"nt/4vvcdv","slide":1,"text":"Mục tiêu buổi học: Vẽ đúng hai pipeline điện thoại/quay đầu và gán nhãn một sự kiện theo khoảng thời gian.\nNguồn nội bộ: deliverables/dao_tao_5_buoi/01_GIAO_AN.md; 11_NGUON_VA_GIOI_HAN.md."}
+{"kind":"slide","id":"sl/f789wi","slide":2,"title":"Câu hỏi dẫn đường","textShapes":10}
+{"kind":"textbox","id":"sh/6pwretgf","slide":2,"text":"Câu hỏi dẫn đường","textPreview":"Câu hỏi dẫn đường","textChars":17,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/tcnq9ofq","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/sre9gjy5","slide":2,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/fe58byxw","slide":2,"text":"Một tư thế trong một frame có đủ để gọi là hành vi quay đầu không?","textPreview":"Một tư thế trong một frame có đủ để gọi là hành vi quay đầu không?","textChars":66,"textLines":1,"bbox":[82,144,1110,118]}
+{"kind":"textbox","id":"sh/edwritgb","slide":2,"text":"Cuối buổi, học viên tự làm được","textPreview":"Cuối buổi, học viên tự làm được","textChars":31,"textLines":1,"bbox":[82,300,500,32]}
+{"kind":"textbox","id":"sh/1g7qd8f2","slide":2,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[84,356,42,42]}
+{"kind":"textbox","id":"sh/0fe9k3yh","slide":2,"text":"Giải thích keypoint và heuristic hình học","textPreview":"Giải thích keypoint và heuristic hình học","textChars":41,"textLines":1,"bbox":[148,344,990,64]}
+{"kind":"textbox","id":"sh/nipsfixs","slide":2,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[84,430,42,42]}
+{"kind":"textbox","id":"sh/2hgrmdg7","slide":2,"text":"Hiểu track ID là mã tạm thời","textPreview":"Hiểu track ID là mã tạm thời","textChars":28,"textLines":1,"bbox":[148,418,990,64]}
+{"kind":"textbox","id":"sh/8j6ho7mt","slide":2,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[84,504,42,42]}
+{"kind":"textbox","id":"sh/9kfyhc3e","slide":2,"text":"Phân biệt frame prediction với event theo thời gian","textPreview":"Phân biệt frame prediction với event theo thời gian","textChars":51,"textLines":1,"bbox":[148,492,990,64]}
+{"kind":"notes","id":"nt/f789wi","slide":2,"text":"Yêu cầu học viên trả lời câu dẫn đường trước khi dạy. Lặp lại cuối buổi để nhìn sự thay đổi trong cách giải thích."}
+{"kind":"slide","id":"sl/70swfl","slide":3,"title":"Pipeline quay đầu là hệ lai","textShapes":18}
+{"kind":"textbox","id":"sh/b6tozytg","slide":3,"text":"Pipeline quay đầu là hệ lai","textPreview":"Pipeline quay đầu là hệ lai","textChars":27,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/c725s3ul","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/x8b618b6","slide":3,"bbox":[64,104,1160,0]}
+{"kind":"shape","id":"sh/210nmtcj","slide":3,"bbox":[74,210,211,176]}
+{"kind":"textbox","id":"sh/n29ovyt4","slide":3,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[90,224,32,28]}
+{"kind":"textbox","id":"sh/o325o3up","slide":3,"text":"Pose model","textPreview":"Pose model","textChars":10,"textLines":1,"bbox":[90,260,179,52]}
+{"kind":"textbox","id":"sh/p4b6x8ba","slide":3,"text":"Dự đoán keypoint","textPreview":"Dự đoán keypoint","textChars":16,"textLines":1,"bbox":[90,316,179,56]}
+{"kind":"shape","id":"sh/ed0ni9cn","slide":3,"bbox":[301,210,211,176]}
+{"kind":"textbox","id":"sh/fe94red8","slide":3,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[317,224,32,28]}
+{"kind":"textbox","id":"sh/bqxsrqhc","slide":3,"text":"Hình học","textPreview":"Hình học","textChars":8,"textLines":1,"bbox":[317,260,179,52]}
+{"kind":"textbox","id":"sh/aporyl07","slide":3,"text":"Tạo điểm nghi vấn","textPreview":"Tạo điểm nghi vấn","textChars":17,"textLines":1,"bbox":[317,316,179,56]}
+{"kind":"shape","id":"sh/xsfatgzi","slide":3,"bbox":[528,210,211,176]}
+{"kind":"textbox","id":"sh/wr6t0bix","slide":3,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[544,224,32,28]}
+{"kind":"textbox","id":"sh/juxsvqho","slide":3,"text":"Tracking","textPreview":"Tracking","textChars":8,"textLines":1,"bbox":[544,260,179,52]}
+{"kind":"textbox","id":"sh/ytob2lg3","slide":3,"text":"Nối người qua frame","textPreview":"Nối người qua frame","textChars":19,"textLines":1,"bbox":[544,316,179,56]}
+{"kind":"shape","id":"sh/lwzax0zu","slide":3,"bbox":[755,210,211,176]}
+{"kind":"textbox","id":"sh/kvqt4vy9","slide":3,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[771,224,32,28]}
+{"kind":"textbox","id":"sh/zydsj6hk","slide":3,"text":"Temporal rule","textPreview":"Temporal rule","textChars":13,"textLines":1,"bbox":[771,260,179,52]}
+{"kind":"textbox","id":"sh/ex4rq10z","slide":3,"text":"Kiểm tra liên tục","textPreview":"Kiểm tra liên tục","textChars":17,"textLines":1,"bbox":[771,316,179,56]}
+{"kind":"shape","id":"sh/itsvy907","slide":3,"bbox":[982,210,211,176]}
+{"kind":"textbox","id":"sh/3elwru1s","slide":3,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[998,224,32,28]}
+{"kind":"textbox","id":"sh/4fud0zid","slide":3,"text":"Human","textPreview":"Human","textChars":5,"textLines":1,"bbox":[998,260,179,52]}
+{"kind":"textbox","id":"sh/5g3et4jy","slide":3,"text":"Duyệt bối cảnh","textPreview":"Duyệt bối cảnh","textChars":14,"textLines":1,"bbox":[998,316,179,56]}
+{"kind":"textbox","id":"sh/upsvupkb","slide":3,"text":"Phần learned tạo keypoint. Phần heuristic và state machine tạo cảnh báo nghiệp vụ.","textPreview":"Phần learned tạo keypoint. Phần heuristic và state machine tạo cảnh báo nghiệp vụ.","textChars":82,"textLines":1,"bbox":[90,446,1080,92]}
+{"kind":"notes","id":"nt/70swfl","slide":3,"text":"Yêu cầu học viên tô màu phần learned, rule-based và human decision bằng ba màu khác nhau."}
+{"kind":"slide","id":"sl/39vsvq","slide":4,"title":"Heuristic và gap guard của project","textShapes":4}
+{"kind":"textbox","id":"sh/8rel87y1","slide":4,"text":"Heuristic và gap guard của project","textPreview":"Heuristic và gap guard của project","textChars":34,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/7q54f2xg","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/6pw36xgv","slide":4,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/l4nmdsfa","slide":4,"text":"Mặc định trong temporal tracker:\n\nAlert duration: 1,25 giây\nMinimum samples: 3\nMaximum gap: 0,75 giây\n\nNếu gap vượt mức, chuỗi nghi vấn reset. Track ID gắn với source/session, không phải danh tính.","textPreview":"Mặc định trong temporal tracker: |  | Alert duration: 1,25 giây | Minimum samples: 3 | Maximum gap: 0,75 giây |  | Nếu gap vượt mức, chuỗ...","textChars":197,"textLines":7,"bbox":[72,144,505,410]}
+{"kind":"textbox","id":"sh/j2l4b2h4","slide":4,"text":"`turn_deg` không được trình bày như góc đầu 3D đã hiệu chuẩn.","textPreview":"`turn_deg` không được trình bày như góc đầu 3D đã hiệu chuẩn.","textChars":61,"textLines":1,"bbox":[78,604,1110,44]}
+{"kind":"image","id":"im/pw7udsju","slide":4,"name":"","alt":"Sơ đồ heuristic pose của project","bbox":[610,140,600,445]}
+{"kind":"notes","id":"nt/39vsvq","slide":4,"text":"Nguồn: backend/services/temporal_tracker.py; datasets/README.md; ảnh nội bộ pose_heuristic_diagram.png."}
+{"kind":"slide","id":"sl/9biwn9","slide":5,"title":"Thực hành trong lớp","textShapes":16}
+{"kind":"textbox","id":"sh/s3a9s7ql","slide":5,"text":"Thực hành trong lớp","textPreview":"Thực hành trong lớp","textChars":19,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/r218z290","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/q1srqh8f","slide":5,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/5gjqxcru","slide":5,"text":"Gán nhãn interval và mô phỏng state machine bằng timeline","textPreview":"Gán nhãn interval và mô phỏng state machine bằng timeline","textChars":57,"textLines":1,"bbox":[78,136,1120,72]}
+{"kind":"textbox","id":"sh/4fa9o7q9","slide":5,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[82,238,42,42]}
+{"kind":"textbox","id":"sh/3e18v29o","slide":5,"text":"Đặt mốc","textPreview":"Đặt mốc","textChars":7,"textLines":1,"bbox":[148,232,350,40]}
+{"kind":"textbox","id":"sh/ids7mx8j","slide":5,"text":"Ghi start, end, direction, target anonymous","textPreview":"Ghi start, end, direction, target anonymous","textChars":43,"textLines":1,"bbox":[508,232,650,58]}
+{"kind":"textbox","id":"sh/pcnq9wre","slide":5,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[82,324,42,42]}
+{"kind":"textbox","id":"sh/obe90rqt","slide":5,"text":"Theo dõi","textPreview":"Theo dõi","textChars":8,"textLines":1,"bbox":[148,318,350,40]}
+{"kind":"textbox","id":"sh/ud4nix8b","slide":5,"text":"Nối quan sát theo source, session, track","textPreview":"Nối quan sát theo source, session, track","textChars":40,"textLines":1,"bbox":[508,318,650,58]}
+{"kind":"textbox","id":"sh/fed4b29w","slide":5,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[82,410,42,42]}
+{"kind":"textbox","id":"sh/gfm5k7q1","slide":5,"text":"Kiểm gap","textPreview":"Kiểm gap","textChars":8,"textLines":1,"bbox":[148,404,350,40]}
+{"kind":"textbox","id":"sh/hgvmdcrm","slide":5,"text":"Reset khi khoảng cách vượt 0,75 s","textPreview":"Reset khi khoảng cách vượt 0,75 s","textChars":33,"textLines":1,"bbox":[508,404,650,58]}
+{"kind":"textbox","id":"sh/69knex8z","slide":5,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[82,496,42,42]}
+{"kind":"textbox","id":"sh/7at47i9k","slide":5,"text":"Phân loại","textPreview":"Phân loại","textChars":9,"textLines":1,"bbox":[148,490,350,40]}
+{"kind":"textbox","id":"sh/8bm5gnq5","slide":5,"text":"Green, yellow hoặc red theo điều kiện","textPreview":"Green, yellow hoặc red theo điều kiện","textChars":37,"textLines":1,"bbox":[508,490,650,58]}
+{"kind":"textbox","id":"sh/tcvm9srq","slide":5,"text":"Sản phẩm nộp: event labels + sơ đồ hai pipeline","textPreview":"Sản phẩm nộp: event labels + sơ đồ hai pipeline","textChars":47,"textLines":1,"bbox":[82,614,1090,34]}
+{"kind":"notes","id":"nt/9biwn9","slide":5,"text":"Dùng phiếu thực hành 12_PHIEU_THUC_HANH.md. Không thao tác trên model, DB hoặc bằng chứng gốc. Các timeline trong bài là giả định, không phải dữ liệu đo mới."}
+{"kind":"slide","id":"sl/cmwpdc","slide":6,"title":"Ba nhầm lẫn cần sửa","textShapes":11}
+{"kind":"textbox","id":"sh/8va5kjel","slide":6,"text":"Ba nhầm lẫn cần sửa","textPreview":"Ba nhầm lẫn cần sửa","textChars":19,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/7u1obex0","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/69snitwf","slide":6,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/l8j69ofu","slide":6,"text":"NHẦM 1","textPreview":"NHẦM 1","textChars":6,"textLines":1,"bbox":[82,148,110,30]}
+{"kind":"textbox","id":"sh/k7q5gjy9","slide":6,"text":"Keypoint đã là kết luận gian lận","textPreview":"Keypoint đã là kết luận gian lận","textChars":32,"textLines":1,"bbox":[210,140,930,45]}
+{"kind":"textbox","id":"sh/j6ho7exo","slide":6,"text":"Keypoint chỉ là output hình học; cần quy tắc và người duyệt.","textPreview":"Keypoint chỉ là output hình học; cần quy tắc và người duyệt.","textChars":60,"textLines":1,"bbox":[210,194,930,66]}
+{"kind":"textbox","id":"sh/y58ne9g3","slide":6,"text":"NHẦM 2","textPreview":"NHẦM 2","textChars":6,"textLines":1,"bbox":[82,304,110,30]}
+{"kind":"textbox","id":"sh/5436l8fy","slide":6,"text":"Track 4 là thí sinh số 4","textPreview":"Track 4 là thí sinh số 4","textChars":24,"textLines":1,"bbox":[210,296,930,45]}
+{"kind":"textbox","id":"sh/43ups3ed","slide":6,"text":"ID có thể đổi khi mất dấu, đổi nguồn hoặc reset phiên.","textPreview":"ID có thể đổi khi mất dấu, đổi nguồn hoặc reset phiên.","textChars":54,"textLines":1,"bbox":[210,350,930,66]}
+{"kind":"textbox","id":"sh/ulwjapwj","slide":6,"text":"NHẦM 3","textPreview":"NHẦM 3","textChars":6,"textLines":1,"bbox":[82,460,110,30]}
+{"kind":"textbox","id":"sh/vm503ud4","slide":6,"text":"Hai frame cách nhau 1,25 s đủ tạo đỏ","textPreview":"Hai frame cách nhau 1,25 s đủ tạo đỏ","textChars":36,"textLines":1,"bbox":[210,452,930,45]}
+{"kind":"textbox","id":"sh/w7e1czep","slide":6,"text":"Chuỗi còn cần tính liên tục và số quan sát tối thiểu.","textPreview":"Chuỗi còn cần tính liên tục và số quan sát tối thiểu.","textChars":53,"textLines":1,"bbox":[210,506,930,66]}
+{"kind":"notes","id":"nt/cmwpdc","slide":6,"text":"Cho học viên tự sửa câu sai trước khi hiện cách diễn đạt đúng. Không biến slide thành đáp án học thuộc."}
+{"kind":"slide","id":"sl/y2zwda","slide":7,"title":"Kiểm tra cuối buổi","textShapes":10}
+{"kind":"textbox","id":"sh/zytgnudo","slide":7,"text":"Kiểm tra cuối buổi","textPreview":"Kiểm tra cuối buổi","textChars":18,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/0z2hgze9","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/l0byp4ve","slide":7,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/qt0fapwr","slide":7,"text":"Không nhìn tài liệu. Giải thích bằng lời của em.","textPreview":"Không nhìn tài liệu. Giải thích bằng lời của em.","textChars":48,"textLines":1,"bbox":[78,136,900,48]}
+{"kind":"textbox","id":"sh/butgjudc","slide":7,"text":"1.","textPreview":"1.","textChars":2,"textLines":1,"bbox":[84,222,40,44]}
+{"kind":"textbox","id":"sh/cv2xczex","slide":7,"text":"Phần nào học từ dữ liệu, phần nào là heuristic?","textPreview":"Phần nào học từ dữ liệu, phần nào là heuristic?","textChars":47,"textLines":1,"bbox":[132,212,1030,64]}
+{"kind":"textbox","id":"sh/dwbylkvi","slide":7,"text":"2.","textPreview":"2.","textChars":2,"textLines":1,"bbox":[84,304,40,44]}
+{"kind":"textbox","id":"sh/up4zm9cb","slide":7,"text":"Khi nào track ID có thể đổi?","textPreview":"Khi nào track ID có thể đổi?","textChars":28,"textLines":1,"bbox":[132,294,1030,64]}
+{"kind":"textbox","id":"sh/vqdgvedw","slide":7,"text":"3.","textPreview":"3.","textChars":2,"textLines":1,"bbox":[84,386,40,44]}
+{"kind":"textbox","id":"sh/nmts32p8","slide":7,"text":"Vì sao event label cần start và end?","textPreview":"Vì sao event label cần start và end?","textChars":36,"textLines":1,"bbox":[132,376,1030,64]}
+{"kind":"textbox","id":"sh/mlkbux8n","slide":7,"text":"Bài nộp: event labels + sơ đồ hai pipeline","textPreview":"Bài nộp: event labels + sơ đồ hai pipeline","textChars":42,"textLines":1,"bbox":[80,636,1080,30]}
+{"kind":"notes","id":"nt/y2zwda","slide":7,"text":"Chấm theo rubric trong 07_KIEM_TRA.md. Một đáp án đúng nhưng không giải thích được ví dụ mới chỉ đạt tối đa một nửa điểm."}

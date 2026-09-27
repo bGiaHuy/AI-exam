@@ -1,6 +1,6 @@
 {
   "name": "ExamControl AI - Hệ thống Giám sát & Quản lý Thi Thông minh",
-  "description": "Hệ thống giám sát phòng thi trực tiếp tích hợp AI, phân tích hành vi gian lận, sơ đồ phòng thi matrix, lập biên bản vi phạm và cấu hình độ nhạy AI.",
+  "description": "Hệ thống giám sát phòng thi tự động bằng thị giác máy tính, phát hiện hành vi nghi vấn và trích xuất clip bằng chứng.",
   "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

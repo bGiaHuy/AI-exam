@@ -20,6 +20,7 @@ export interface AIDetectionResult {
   level: 'red' | 'yellow' | 'green';
   raw_coords?: [number, number, number, number];
   track_id?: number;
+  source_id?: string;
 }
 
 export interface FrameDetectionResponse {
@@ -132,11 +133,13 @@ export interface IngestTelemetry {
 }
 
 
+import { getApiBaseUrl, getWsBaseUrl } from './api';
+
 export type DetectionCallback = (payload: WebSocketDetectionPayload) => void;
 export type TelemetryCallback = (telemetry: IngestTelemetry) => void;
 export type StatusCallback = (isConnected: boolean, error?: string) => void;
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = getApiBaseUrl().replace(/\/api$/, '');
 
 class AIModelService {
   private isOnline: boolean = false;
@@ -396,7 +399,8 @@ export class WebSocketIngestClient {
     this.sequenceId = 0;
     this.lastRenderedSequenceId = -1;
 
-    const wsUrl = `ws://localhost:8000/api/ws/ingest?source_id=${encodeURIComponent(this.sourceId)}&session_id=${encodeURIComponent(this.sessionId)}`;
+    const wsBase = getWsBaseUrl();
+    const wsUrl = `${wsBase}/ws/ingest?source_id=${encodeURIComponent(this.sourceId)}&session_id=${encodeURIComponent(this.sessionId)}`;
     console.log(`[WS_INGEST] Connecting to ${wsUrl}`);
 
     try {
@@ -638,4 +642,125 @@ export class WebSocketIngestClient {
     return this.isConnected;
   }
 
+}
+
+
+export class WebSocketPreviewClient {
+  private ws: WebSocket | null = null;
+  private isConnected: boolean = false;
+  private stopped: boolean = false;
+  private sourceId: string;
+  private fps: number;
+  private currentObjectUrl: string | null = null;
+  private onFrameCallback: ((url: string, seq: number, ts: number) => void) | null = null;
+  private onStatusCallback: ((status: string, reason?: string) => void) | null = null;
+  private onDetectionsCallback: ((detections: AIDetectionResult[], level: string) => void) | null = null;
+
+  constructor(sourceId: string, fps: number = 10) {
+    this.sourceId = sourceId;
+    this.fps = fps;
+  }
+
+  public onFrame(cb: (url: string, seq: number, ts: number) => void) {
+    this.onFrameCallback = cb;
+    return this;
+  }
+
+  public onStatus(cb: (status: string, reason?: string) => void) {
+    this.onStatusCallback = cb;
+    return this;
+  }
+
+  public onDetections(cb: (detections: AIDetectionResult[], level: string) => void) {
+    this.onDetectionsCallback = cb;
+    return this;
+  }
+
+  public connect(
+    onFrame?: (url: string, seq: number, ts: number) => void,
+    onStatus?: (status: string, reason?: string) => void,
+    onDetections?: (detections: AIDetectionResult[], level: string) => void
+  ) {
+    if (onFrame) this.onFrameCallback = onFrame;
+    if (onStatus) this.onStatusCallback = onStatus;
+    if (onDetections) this.onDetectionsCallback = onDetections;
+    this.stopped = false;
+    const base = getWsBaseUrl();
+    const wsUrl = `${base}/ws/preview?source_id=${encodeURIComponent(this.sourceId)}&fps=${this.fps}`;
+
+    try {
+      this.ws = new WebSocket(wsUrl);
+      this.ws.binaryType = 'arraybuffer';
+
+      this.ws.onopen = () => {
+        this.isConnected = true;
+      };
+
+      this.ws.onmessage = (event: MessageEvent) => {
+        if (typeof event.data === 'string') {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'status' && this.onStatusCallback) {
+              this.onStatusCallback(data.status, data.reason);
+            } else if (data.type === 'detections' && this.onDetectionsCallback) {
+              this.onDetectionsCallback(data.detections || [], data.level || 'normal');
+            }
+          } catch (e) {
+            // ignore JSON parse error
+          }
+        } else if (event.data instanceof ArrayBuffer) {
+          // Binary JPEG with 16-byte header: (8B seq_id, 8B timestamp)
+          if (event.data.byteLength > 16) {
+            const view = new DataView(event.data);
+            const seq = Number(view.getBigInt64(0));
+            const ts = view.getFloat64(8);
+            const jpegBuffer = event.data.slice(16);
+            const blob = new Blob([jpegBuffer], { type: 'image/jpeg' });
+            if (this.currentObjectUrl) {
+              URL.revokeObjectURL(this.currentObjectUrl);
+            }
+            const url = URL.createObjectURL(blob);
+            this.currentObjectUrl = url;
+            if (this.onFrameCallback) {
+              this.onFrameCallback(url, seq, ts);
+            }
+          }
+        }
+      };
+
+      this.ws.onclose = () => {
+        this.isConnected = false;
+        if (!this.stopped) {
+          setTimeout(() => {
+            if (!this.stopped) this.connect();
+          }, 1500);
+        }
+      };
+
+      this.ws.onerror = () => {
+        this.isConnected = false;
+      };
+    } catch (err) {
+      console.warn(`[WS_PREVIEW] Connection error for ${this.sourceId}:`, err);
+    }
+  }
+
+  public disconnect() {
+    this.stopped = true;
+    if (this.ws) {
+      this.ws.onclose = null;
+      this.ws.onerror = null;
+      this.ws.close();
+      this.ws = null;
+    }
+    if (this.currentObjectUrl) {
+      URL.revokeObjectURL(this.currentObjectUrl);
+      this.currentObjectUrl = null;
+    }
+    this.isConnected = false;
+  }
+
+  public getIsConnected(): boolean {
+    return this.isConnected;
+  }
 }

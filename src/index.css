@@ -1,16 +1,21 @@
 @import "tailwindcss";
 
+:root {
+  --primary-blue: #2344B6;
+  --navy: #173B7A;
+  --alert-red: #EF3340;
+  --success-green: #16B364;
+  --warning-amber: #F59E0B;
+  --bg: #F7FAFF;
+  --card: #FFFFFF;
+  --border: #DCE6F5;
+  --muted-blue: #9DB9EA;
+}
+
 @layer base {
   body {
-    background-color: #080a10;
-    background-image: 
-      radial-gradient(circle at 10% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 45%),
-      radial-gradient(circle at 85% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 50% 80%, rgba(244, 63, 94, 0.12) 0%, transparent 50%),
-      radial-gradient(circle at 90% 85%, rgba(14, 165, 233, 0.15) 0%, transparent 45%),
-      radial-gradient(circle at 25% 65%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
-    background-attachment: fixed;
-    color: #f4f4f5;
+    background-color: #F7FAFF;
+    color: #1E293B;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     min-height: 100vh;
   }
@@ -256,21 +261,20 @@
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar for Light Institutional Theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(10, 13, 20, 0.4);
+  background: #F1F5F9;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: #CBD5E1;
   border-radius: 9999px;
-  backdrop-filter: blur(8px);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #94A3B8;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -280,11 +284,11 @@
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: #DCE6F5;
   border-radius: 9999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #9DB9EA;
 }
 
 .font-mono-data {

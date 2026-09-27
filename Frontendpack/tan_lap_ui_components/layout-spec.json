@@ -1,0 +1,97 @@
+{
+  "reference_board": {
+    "width": 1536,
+    "height": 1024
+  },
+  "design_direction": "THPT Tân Lập - light institutional AI monitoring dashboard",
+  "layout": {
+    "header_height": "88-104px",
+    "sidebar_width": "188-210px",
+    "main_content": "flex: 1",
+    "incident_sidebar_width": "300-340px",
+    "camera_grid": "3 columns on desktop",
+    "camera_gap": "12-16px",
+    "content_padding": "16-20px"
+  },
+  "colors": {
+    "primary_blue": "#2344B6",
+    "navy": "#173B7A",
+    "red": "#EF3340",
+    "green": "#16B364",
+    "amber": "#F59E0B",
+    "background": "#F7FAFF",
+    "surface": "#FFFFFF",
+    "border": "#DCE6F5",
+    "muted_blue": "#9DB9EA"
+  },
+  "component_files": {
+    "01_branding/brand-lockup-reference.png": [
+      578,
+      158
+    ],
+    "02_header/header-full-reference.png": [
+      637,
+      152
+    ],
+    "03_sidebar/sidebar-navigation-reference.png": [
+      195,
+      645
+    ],
+    "04_controls/top-status-bar-reference.png": [
+      906,
+      200
+    ],
+    "05_status/system-status-reference.png": [
+      184,
+      199
+    ],
+    "05_status/user-menu-reference.png": [
+      198,
+      199
+    ],
+    "06_camera_cards/camera-card-violation.png": [
+      282,
+      374
+    ],
+    "06_camera_cards/camera-card-normal.png": [
+      288,
+      374
+    ],
+    "06_camera_cards/camera-card-offline.png": [
+      289,
+      374
+    ],
+    "07_incident_cards/incident-card-critical.png": [
+      392,
+      128
+    ],
+    "07_incident_cards/incident-card-warning.png": [
+      392,
+      124
+    ],
+    "07_incident_cards/incident-card-info.png": [
+      392,
+      132
+    ],
+    "08_badges_icons/badges-tags-reference.png": [
+      536,
+      157
+    ],
+    "08_badges_icons/icons-reference.png": [
+      321,
+      157
+    ],
+    "09_table/table-reference.png": [
+      637,
+      157
+    ]
+  },
+  "notes": [
+    "Giữ bố cục dashboard hiện tại: header trên cùng, sidebar trái, camera ở trung tâm, incident list bên phải.",
+    "Không biến UI thành landing page.",
+    "Pattern trường chỉ làm watermark opacity thấp.",
+    "Camera card phải dùng video thật và overlay AI DOM/SVG thật, không dùng ảnh card làm UI production.",
+    "Các PNG component là visual reference; agent phải recreate bằng component thực.",
+    "Logo dùng file gốc người dùng cung cấp."
+  ]
+}
