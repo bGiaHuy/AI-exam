@@ -10,9 +10,10 @@ Single source of truth between Backend and Frontend.
 import os
 import json
 import logging
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from schemas import AISettingsSchema
 from services.ring_buffer import ring_buffer_service
+from routers.ai_engine import verify_write_allowed
 
 logger = logging.getLogger("settings_router")
 router = APIRouter(prefix="/settings", tags=["AI Settings"])
@@ -30,7 +31,7 @@ def load_settings() -> AISettingsSchema:
         except Exception as e:
             logger.warning(f"Could not parse {SETTINGS_FILE}: {e}")
     return AISettingsSchema(
-        phone_confidence=0.35,
+        phone_confidence=0.55,
         posture_alert_seconds=1.25,
         suspicion_threshold=0.50,
         pre_roll_seconds=5.0,
@@ -69,7 +70,7 @@ def get_ai_settings():
     return load_settings()
 
 
-@router.post("/ai", response_model=AISettingsSchema)
+@router.post("/ai", response_model=AISettingsSchema, dependencies=[Depends(verify_write_allowed)])
 def update_ai_settings(payload: AISettingsSchema):
     """
     Cập nhật cấu hình độ nhạy AI và đồng bộ hóa ngay lập tức vào RingBuffer.

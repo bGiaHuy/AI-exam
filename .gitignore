@@ -20,7 +20,6 @@ backend/**/__pycache__/
 .env
 .env.local
 .DS_Store
-.github/
 
 # Local SQLite databases, WAL, SHM & Backups
 *.db
@@ -29,7 +28,14 @@ backend/**/__pycache__/
 cheating_system_backup_*.db
 test_*.db
 
-# Runtime evidence directory
+# Zero-Video Retention Guarantee (Never commit evidence clips, recordings or video media)
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.flv
+*.m2ts
 data/evidence/*
 !data/evidence/.gitkeep
 
@@ -48,6 +54,8 @@ handoff/
 handoffv2/
 handoffv3/
 handoffv2.zip
+artifacts/
+data/isolated_acceptance/
 
 # Preserved examples
 !.env.example
@@ -68,3 +76,7 @@ datasets/**/videos/**/*.mkv
 !datasets/**/metadata/*.csv
 !datasets/**/annotations/*.csv
 !datasets/**/data_phone.yaml
+.vercel
+.env*
+!.env.example
+

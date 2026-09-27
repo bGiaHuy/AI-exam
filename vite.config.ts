@@ -11,6 +11,16 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      sourcemap: false,
+      minify: 'esbuild' as const,
+      cssMinify: true,
+      rollupOptions: {
+        output: {
+          compact: true,
+        },
+      },
+    },
     server: {
       port: 3000,
       host: '0.0.0.0',

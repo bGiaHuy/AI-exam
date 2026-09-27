@@ -1,0 +1,104 @@
+{"kind":"deck","id":"pr/ldmv6g","name":"Deck"}
+{"kind":"layout","layoutId":"3cca72a0-6482-4674-bd2d-f1ff3868e9da","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"7105dcb7-1300-4709-8ed4-58128cac0c91","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/5lju4w","slide":1,"title":"BUỔI 2","textShapes":5}
+{"kind":"textbox","id":"sh/58jq9k32","slide":1,"text":"BUỔI 2","textPreview":"BUỔI 2","textChars":6,"textLines":1,"bbox":[70,64,240,38]}
+{"kind":"textbox","id":"sh/ils7e5kb","slide":1,"text":"Computer Vision và object detection","textPreview":"Computer Vision và object detection","textChars":35,"textLines":1,"bbox":[70,136,980,160]}
+{"kind":"textbox","id":"sh/jm1o7alw","slide":1,"text":"Pixel, bounding box, confidence và cách ghép prediction với nhãn","textPreview":"Pixel, bounding box, confidence và cách ghép prediction với nhãn","textChars":64,"textLines":1,"bbox":[72,316,850,86]}
+{"kind":"shape","id":"sh/sbapkz2t","slide":1,"bbox":[72,454,850,0]}
+{"kind":"textbox","id":"sh/tcjqdk3y","slide":1,"text":"Gán nhãn YOLO hợp lệ, tính IoU và đếm TP, FP, FN theo một operating point đã cho.","textPreview":"Gán nhãn YOLO hợp lệ, tính IoU và đếm TP, FP, FN theo một operating point đã cho.","textChars":81,"textLines":1,"bbox":[72,478,880,100]}
+{"kind":"textbox","id":"sh/69s7ipkn","slide":1,"text":"AI EXAM CONTROL · HỌC QUA ARTIFACT CỦA PROJECT","textPreview":"AI EXAM CONTROL · HỌC QUA ARTIFACT CỦA PROJECT","textChars":46,"textLines":1,"bbox":[72,642,800,26]}
+{"kind":"notes","id":"nt/5lju4w","slide":1,"text":"Mục tiêu buổi học: Gán nhãn YOLO hợp lệ, tính IoU và đếm TP, FP, FN theo một operating point đã cho.\nNguồn nội bộ: deliverables/dao_tao_5_buoi/01_GIAO_AN.md; 11_NGUON_VA_GIOI_HAN.md."}
+{"kind":"slide","id":"sl/nk2rfc","slide":2,"title":"Câu hỏi dẫn đường","textShapes":10}
+{"kind":"textbox","id":"sh/2honexkz","slide":2,"text":"Câu hỏi dẫn đường","textPreview":"Câu hỏi dẫn đường","textChars":17,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/pkfmpc3a","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/oj65g72p","slide":2,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/fed4jil8","slide":2,"text":"Một ảnh biến thành con số thế nào, và model biết một bounding box là đúng bằng cách nào?","textPreview":"Một ảnh biến thành con số thế nào, và model biết một bounding box là đúng bằng cách nào?","textChars":88,"textLines":1,"bbox":[82,144,1110,118]}
+{"kind":"textbox","id":"sh/ed43adkn","slide":2,"text":"Cuối buổi, học viên tự làm được","textPreview":"Cuối buổi, học viên tự làm được","textChars":31,"textLines":1,"bbox":[82,300,500,32]}
+{"kind":"textbox","id":"sh/1gfmls3e","slide":2,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[84,356,42,42]}
+{"kind":"textbox","id":"sh/0fm5cn2t","slide":2,"text":"Phân biệt classification với detection","textPreview":"Phân biệt classification với detection","textChars":38,"textLines":1,"bbox":[148,344,990,64]}
+{"kind":"textbox","id":"sh/zah4vmlc","slide":2,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[84,430,42,42]}
+{"kind":"textbox","id":"sh/y98nmhk7","slide":2,"text":"Đọc và tạo nhãn YOLO chuẩn hóa","textPreview":"Đọc và tạo nhãn YOLO chuẩn hóa","textChars":30,"textLines":1,"bbox":[148,418,990,64]}
+{"kind":"textbox","id":"sh/onuh8nud","slide":2,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[84,504,42,42]}
+{"kind":"textbox","id":"sh/9o3i1svy","slide":2,"text":"Giải thích confidence, IoU, threshold và NMS","textPreview":"Giải thích confidence, IoU, threshold và NMS","textChars":44,"textLines":1,"bbox":[148,492,990,64]}
+{"kind":"notes","id":"nt/nk2rfc","slide":2,"text":"Yêu cầu học viên trả lời câu dẫn đường trước khi dạy. Lặp lại cuối buổi để nhìn sự thay đổi trong cách giải thích."}
+{"kind":"slide","id":"sl/dgmfaq","slide":3,"title":"Từ pixel đến detection","textShapes":18}
+{"kind":"textbox","id":"sh/a1kjyl4v","slide":3,"text":"Từ pixel đến detection","textPreview":"Từ pixel đến detection","textChars":22,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/x4vi903m","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/c3m10vm1","slide":3,"bbox":[64,104,1160,0]}
+{"kind":"shape","id":"sh/nyt03ql4","slide":3,"bbox":[74,210,211,176]}
+{"kind":"textbox","id":"sh/2xkjul4z","slide":3,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[90,224,32,28]}
+{"kind":"textbox","id":"sh/p0bi503a","slide":3,"text":"Ảnh","textPreview":"Ảnh","textChars":3,"textLines":1,"bbox":[90,260,179,52]}
+{"kind":"textbox","id":"sh/oz21wvmp","slide":3,"text":"Pixel và channel","textPreview":"Pixel và channel","textChars":16,"textLines":1,"bbox":[90,316,179,56]}
+{"kind":"shape","id":"sh/fa90z6l8","slide":3,"bbox":[301,210,211,176]}
+{"kind":"textbox","id":"sh/e90zq14n","slide":3,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[317,224,32,28]}
+{"kind":"textbox","id":"sh/gv6t4725","slide":3,"text":"Resize","textPreview":"Resize","textChars":6,"textLines":1,"bbox":[317,260,179,52]}
+{"kind":"textbox","id":"sh/hwzuxcjq","slide":3,"text":"Giữ hoặc mất chi tiết","textPreview":"Giữ hoặc mất chi tiết","textChars":21,"textLines":1,"bbox":[317,316,179,56]}
+{"kind":"shape","id":"sh/utob2xkz","slide":3,"bbox":[528,210,211,176]}
+{"kind":"textbox","id":"sh/vuxcv21k","slide":3,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[544,224,32,28]}
+{"kind":"textbox","id":"sh/8r6t0n2t","slide":3,"text":"Model","textPreview":"Model","textChars":5,"textLines":1,"bbox":[544,260,179,52]}
+{"kind":"textbox","id":"sh/tsfutsje","slide":3,"text":"Dự đoán box và điểm","textPreview":"Dự đoán box và điểm","textChars":19,"textLines":1,"bbox":[544,316,179,56]}
+{"kind":"shape","id":"sh/6pobydk3","slide":3,"bbox":[755,210,211,176]}
+{"kind":"textbox","id":"sh/7qxcri18","slide":3,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[771,224,32,28]}
+{"kind":"textbox","id":"sh/snadcr2d","slide":3,"text":"Ngưỡng","textPreview":"Ngưỡng","textChars":6,"textLines":1,"bbox":[771,260,179,52]}
+{"kind":"textbox","id":"sh/doju5wjy","slide":3,"text":"Giữ prediction","textPreview":"Giữ prediction","textChars":14,"textLines":1,"bbox":[771,316,179,56]}
+{"kind":"shape","id":"sh/14fupcb2","slide":3,"bbox":[982,210,211,176]}
+{"kind":"textbox","id":"sh/036twruh","slide":3,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[998,224,32,28]}
+{"kind":"textbox","id":"sh/z2xcnmtw","slide":3,"text":"NMS","textPreview":"NMS","textChars":3,"textLines":1,"bbox":[998,260,179,52]}
+{"kind":"textbox","id":"sh/e14buhcb","slide":3,"text":"Loại box trùng","textPreview":"Loại box trùng","textChars":14,"textLines":1,"bbox":[998,316,179,56]}
+{"kind":"textbox","id":"sh/dgvulcbq","slide":3,"text":"Camera FPS, inference FPS và số kết quả mỗi giây là ba đại lượng cần gọi đúng.","textPreview":"Camera FPS, inference FPS và số kết quả mỗi giây là ba đại lượng cần gọi đúng.","textChars":78,"textLines":1,"bbox":[90,446,1080,92]}
+{"kind":"notes","id":"nt/dgmfaq","slide":3,"text":"Phóng to một ảnh để chỉ pixel. Dùng vật nhỏ ở xa để giải thích tác động độ phân giải."}
+{"kind":"slide","id":"sl/4uimkh","slide":4,"title":"Detector điện thoại trong giao diện","textShapes":4}
+{"kind":"textbox","id":"sh/0bq54361","slide":4,"text":"Detector điện thoại trong giao diện","textPreview":"Detector điện thoại trong giao diện","textChars":35,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/zah4by5w","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/e98n2tob","slide":4,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/d8zm9onq","slide":4,"text":"Classification trả một lớp cho toàn ảnh.\n\nDetection trả class, bounding box và confidence.\n\nIoU đo độ chồng khớp giữa prediction và ground truth.\n\nThreshold chọn operating point. NMS giảm box trùng.","textPreview":"Classification trả một lớp cho toàn ảnh. |  | Detection trả class, bounding box và confidence. |  | IoU đo độ chồng khớp giữa prediction ...","textChars":198,"textLines":7,"bbox":[72,144,505,410]}
+{"kind":"textbox","id":"sh/r6h47e5k","slide":4,"text":"Confidence không phải xác suất một người đang gian lận.","textPreview":"Confidence không phải xác suất một người đang gian lận.","textChars":55,"textLines":1,"bbox":[78,604,1110,44]}
+{"kind":"image","id":"im/1sbut4vy","slide":4,"name":"","alt":"Giao diện giám sát đa camera của project","bbox":[610,140,600,445]}
+{"kind":"notes","id":"nt/4uimkh","slide":4,"text":"Ảnh nội bộ: deliverables/ha_noi/screenshots/live_monitor_multi_cam.png. Khái niệm đánh giá đối chiếu scripts/evaluation/evaluate_phone.py."}
+{"kind":"slide","id":"sl/mb305b","slide":5,"title":"Thực hành trong lớp","textShapes":16}
+{"kind":"textbox","id":"sh/7q1gfiho","slide":5,"text":"Thực hành trong lớp","textPreview":"Thực hành trong lớp","textChars":19,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/8raxony9","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/9s3yh8zu","slide":5,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/ylsfit07","slide":5,"text":"Gán nhãn, review box và chấm tám prediction giả định","textPreview":"Gán nhãn, review box và chấm tám prediction giả định","textChars":52,"textLines":1,"bbox":[78,136,1120,72]}
+{"kind":"textbox","id":"sh/zm1wbyhs","slide":5,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[82,238,42,42]}
+{"kind":"textbox","id":"sh/knaxk3id","slide":5,"text":"Vẽ box","textPreview":"Vẽ box","textChars":6,"textLines":1,"bbox":[148,232,350,40]}
+{"kind":"textbox","id":"sh/lojyd8zy","slide":5,"text":"Bao sát điện thoại theo guideline","textPreview":"Bao sát điện thoại theo guideline","textChars":33,"textLines":1,"bbox":[508,232,650,58]}
+{"kind":"textbox","id":"sh/ihcfuxgb","slide":5,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[82,324,42,42]}
+{"kind":"textbox","id":"sh/jilgn2hw","slide":5,"text":"Chuẩn hóa","textPreview":"Chuẩn hóa","textChars":9,"textLines":1,"bbox":[148,318,350,40]}
+{"kind":"textbox","id":"sh/rqhczulc","slide":5,"text":"Đổi sang class, tâm, rộng, cao","textPreview":"Đổi sang class, tâm, rộng, cao","textChars":30,"textLines":1,"bbox":[508,318,650,58]}
+{"kind":"textbox","id":"sh/6p8vqpkr","slide":5,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[82,410,42,42]}
+{"kind":"textbox","id":"sh/dsze1k3i","slide":5,"text":"Review","textPreview":"Review","textChars":6,"textLines":1,"bbox":[148,404,350,40]}
+{"kind":"textbox","id":"sh/srqdsz2x","slide":5,"text":"So nhãn giữa hai người","textPreview":"So nhãn giữa hai người","textChars":22,"textLines":1,"bbox":[508,404,650,58]}
+{"kind":"textbox","id":"sh/fu1w3ul8","slide":5,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[82,496,42,42]}
+{"kind":"textbox","id":"sh/et8vupkn","slide":5,"text":"Đánh giá","textPreview":"Đánh giá","textChars":8,"textLines":1,"bbox":[148,490,350,40]}
+{"kind":"textbox","id":"sh/1gje543e","slide":5,"text":"Áp confidence và IoU để đếm TP, FP, FN","textPreview":"Áp confidence và IoU để đếm TP, FP, FN","textChars":38,"textLines":1,"bbox":[508,490,650,58]}
+{"kind":"textbox","id":"sh/0vadwz2t","slide":5,"text":"Sản phẩm nộp: 10 nhãn mẫu + phiếu kiểm nhãn","textPreview":"Sản phẩm nộp: 10 nhãn mẫu + phiếu kiểm nhãn","textChars":43,"textLines":1,"bbox":[82,614,1090,34]}
+{"kind":"notes","id":"nt/mb305b","slide":5,"text":"Dùng phiếu thực hành 12_PHIEU_THUC_HANH.md. Không thao tác trên model, DB hoặc bằng chứng gốc. Ảnh negative phải có file label rỗng theo protocol project."}
+{"kind":"slide","id":"sl/72qn5u","slide":6,"title":"Ba nhầm lẫn cần sửa","textShapes":11}
+{"kind":"textbox","id":"sh/6tw7ido7","slide":6,"text":"Ba nhầm lẫn cần sửa","textPreview":"Ba nhầm lẫn cần sửa","textChars":19,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/tw76ts7y","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/svypkn6d","slide":6,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/jq5onypw","slide":6,"text":"NHẦM 1","textPreview":"NHẦM 1","textChars":6,"textLines":1,"bbox":[82,148,110,30]}
+{"kind":"textbox","id":"sh/ipwnetob","slide":6,"text":"Box rộng hơn sẽ an toàn hơn","textPreview":"Box rộng hơn sẽ an toàn hơn","textChars":27,"textLines":1,"bbox":[210,140,930,45]}
+{"kind":"textbox","id":"sh/5sn6p87m","slide":6,"text":"Box dư nền làm nhãn kém nhất quán và giảm chất lượng định vị.","textPreview":"Box dư nền làm nhãn kém nhất quán và giảm chất lượng định vị.","textChars":61,"textLines":1,"bbox":[210,194,930,66]}
+{"kind":"textbox","id":"sh/4repg361","slide":6,"text":"NHẦM 2","textPreview":"NHẦM 2","textChars":6,"textLines":1,"bbox":[82,304,110,30]}
+{"kind":"textbox","id":"sh/3mpoz250","slide":6,"text":"Confidence 0,9 nghĩa là đúng 90%","textPreview":"Confidence 0,9 nghĩa là đúng 90%","textChars":32,"textLines":1,"bbox":[210,296,930,45]}
+{"kind":"textbox","id":"sh/2lg7qxof","slide":6,"text":"Confidence là điểm dự đoán; độ đúng cần đo trên dữ liệu có nhãn.","textPreview":"Confidence là điểm dự đoán; độ đúng cần đo trên dữ liệu có nhãn.","textChars":64,"textLines":1,"bbox":[210,350,930,66]}
+{"kind":"textbox","id":"sh/orahcvyd","slide":6,"text":"NHẦM 3","textPreview":"NHẦM 3","textChars":6,"textLines":1,"bbox":[82,460,110,30]}
+{"kind":"textbox","id":"sh/9sji50fy","slide":6,"text":"Hạ threshold luôn tốt","textPreview":"Hạ threshold luôn tốt","textChars":21,"textLines":1,"bbox":[210,452,930,45]}
+{"kind":"textbox","id":"sh/mp8za5g7","slide":6,"text":"Hạ ngưỡng thường giữ thêm cả true positive và false positive.","textPreview":"Hạ ngưỡng thường giữ thêm cả true positive và false positive.","textChars":61,"textLines":1,"bbox":[210,506,930,66]}
+{"kind":"notes","id":"nt/72qn5u","slide":6,"text":"Cho học viên tự sửa câu sai trước khi hiện cách diễn đạt đúng. Không biến slide thành đáp án học thuộc."}
+{"kind":"slide","id":"sl/kkikfh","slide":7,"title":"Kiểm tra cuối buổi","textShapes":10}
+{"kind":"textbox","id":"sh/ip87q187","slide":7,"text":"Kiểm tra cuối buổi","textPreview":"Kiểm tra cuối buổi","textChars":18,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/5sj6lgry","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/krapsbqd","slide":7,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/vmhof69g","slide":7,"text":"Không nhìn tài liệu. Giải thích bằng lời của em.","textPreview":"Không nhìn tài liệu. Giải thích bằng lời của em.","textChars":48,"textLines":1,"bbox":[78,136,900,48]}
+{"kind":"textbox","id":"sh/al87m18v","slide":7,"text":"1.","textPreview":"1.","textChars":2,"textLines":1,"bbox":[84,222,40,44]}
+{"kind":"textbox","id":"sh/xoz6hwrm","slide":7,"text":"Detection thêm thông tin gì so với classification?","textPreview":"Detection thêm thông tin gì so với classification?","textChars":50,"textLines":1,"bbox":[132,212,1030,64]}
+{"kind":"textbox","id":"sh/wnqpobq1","slide":7,"text":"2.","textPreview":"2.","textChars":2,"textLines":1,"bbox":[84,304,40,44]}
+{"kind":"textbox","id":"sh/nihobm9k","slide":7,"text":"IoU đo gì và không đo gì?","textPreview":"IoU đo gì và không đo gì?","textChars":25,"textLines":1,"bbox":[132,294,1030,64]}
+{"kind":"textbox","id":"sh/mhonih8z","slide":7,"text":"3.","textPreview":"3.","textChars":2,"textLines":1,"bbox":[84,386,40,44]}
+{"kind":"textbox","id":"sh/4b2l8v6p","slide":7,"text":"NMS giải quyết vấn đề nào?","textPreview":"NMS giải quyết vấn đề nào?","textChars":26,"textLines":1,"bbox":[132,376,1030,64]}
+{"kind":"textbox","id":"sh/pcbmh0na","slide":7,"text":"Bài nộp: 10 nhãn mẫu + phiếu kiểm nhãn","textPreview":"Bài nộp: 10 nhãn mẫu + phiếu kiểm nhãn","textChars":38,"textLines":1,"bbox":[80,636,1080,30]}
+{"kind":"notes","id":"nt/kkikfh","slide":7,"text":"Chấm theo rubric trong 07_KIEM_TRA.md. Một đáp án đúng nhưng không giải thích được ví dụ mới chỉ đạt tối đa một nửa điểm."}

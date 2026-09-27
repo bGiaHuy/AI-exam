@@ -2,7 +2,7 @@
 ================================================================================
 HARDENED TRANSACTION-SAFE DATABASE MIGRATION SCRIPT - AI EXAM CONTROL
 ================================================================================
-Ensures safe migration to minimal identity-free schema with zero risk of data loss.
+Ensures safe migration to minimal identity-free schema with transactional safety.
 Features:
   1. Unique timestamped backups (never overwrites old backups)
   2. Strict backup verification (file exists, size matches, sqlite integrity check)
@@ -25,12 +25,20 @@ logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] [m
 logger = logging.getLogger("migrate_db")
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "cheating_system.db")
+_env_db = os.getenv("AIEXAM_ISOLATED_DB")
+if not _env_db and os.getenv("DATABASE_URL"):
+    _url = os.getenv("DATABASE_URL", "")
+    if _url.startswith("sqlite:///"):
+        _env_db = _url[len("sqlite:///"):]
+DB_PATH = os.path.abspath(_env_db) if _env_db else os.path.join(BASE_DIR, "cheating_system.db")
 
 NEW_SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS incidents (
     id VARCHAR(100) PRIMARY KEY,
-    source_id VARCHAR(100) NOT NULL,
+    source_id VARCHAR(100) NOT NULL DEFAULT 'cam1',
+    source_label VARCHAR(100) DEFAULT 'Camera 1',
+    source_type VARCHAR(50) DEFAULT 'browser_ws',
+    session_id VARCHAR(100),
     track_id INTEGER,
     violation_type VARCHAR(50) NOT NULL,
     confidence REAL NOT NULL,
@@ -46,6 +54,7 @@ CREATE TABLE IF NOT EXISTS incidents (
 );
 CREATE INDEX IF NOT EXISTS ix_incidents_id ON incidents (id);
 CREATE INDEX IF NOT EXISTS ix_incidents_source_id ON incidents (source_id);
+CREATE INDEX IF NOT EXISTS ix_incidents_session_id ON incidents (session_id);
 CREATE INDEX IF NOT EXISTS ix_incidents_track_id ON incidents (track_id);
 CREATE INDEX IF NOT EXISTS ix_incidents_detected_at ON incidents (detected_at);
 """
@@ -200,9 +209,28 @@ def migrate_database(db_path: str = DB_PATH) -> Tuple[bool, str]:
                     )
                     logger.info(f"Migrated {len(old_incidents)} legacy records into clean schema.")
             else:
+                # Add any missing Sprint 3.2 Dual-Camera columns idempotently
+                cursor.execute("PRAGMA table_info(incidents);")
+                current_cols = [row[1] for row in cursor.fetchall()]
+
+                if "source_label" not in current_cols:
+                    cursor.execute("ALTER TABLE incidents ADD COLUMN source_label VARCHAR(100) DEFAULT 'Camera 1';")
+                    cursor.execute("UPDATE incidents SET source_label = 'Camera 1' WHERE source_label IS NULL;")
+                    logger.info("Added 'source_label' column to incidents table.")
+
+                if "source_type" not in current_cols:
+                    cursor.execute("ALTER TABLE incidents ADD COLUMN source_type VARCHAR(50) DEFAULT 'browser_ws';")
+                    cursor.execute("UPDATE incidents SET source_type = 'browser_ws' WHERE source_type IS NULL;")
+                    logger.info("Added 'source_type' column to incidents table.")
+
+                if "session_id" not in current_cols:
+                    cursor.execute("ALTER TABLE incidents ADD COLUMN session_id VARCHAR(100);")
+                    logger.info("Added 'session_id' column to incidents table.")
+
                 # Ensure indexes exist without dropping existing data
                 cursor.execute("CREATE INDEX IF NOT EXISTS ix_incidents_id ON incidents (id);")
                 cursor.execute("CREATE INDEX IF NOT EXISTS ix_incidents_source_id ON incidents (source_id);")
+                cursor.execute("CREATE INDEX IF NOT EXISTS ix_incidents_session_id ON incidents (session_id);")
                 cursor.execute("CREATE INDEX IF NOT EXISTS ix_incidents_track_id ON incidents (track_id);")
                 cursor.execute("CREATE INDEX IF NOT EXISTS ix_incidents_detected_at ON incidents (detected_at);")
 
@@ -216,8 +244,14 @@ def migrate_database(db_path: str = DB_PATH) -> Tuple[bool, str]:
 
         cursor.execute("PRAGMA journal_mode=WAL;")
         cursor.execute("PRAGMA synchronous=NORMAL;")
-        logger.info("Database migration completed successfully with WAL mode.")
-        return True, "Migration completed successfully"
+        logger.info("Database schema migration completed successfully with WAL mode.")
+
+        # Step 4: Audit and migrate confidence scores
+        audit_success, audit_stats = audit_and_migrate_confidence(db_path, backup_first=False)
+        if not audit_success:
+            raise RuntimeError(f"Confidence migration failed: {audit_stats.get('error')}")
+
+        return True, f"Migration completed successfully. Stats: {audit_stats}"
 
     except Exception as e:
         logger.error(f"Migration failed: {e}. Initiating restore from backup...", exc_info=True)
@@ -226,7 +260,7 @@ def migrate_database(db_path: str = DB_PATH) -> Tuple[bool, str]:
         except Exception:
             pass
 
-        # Step 4: Restore database from verified backup if failure occurred
+        # Step 5: Restore database from verified backup if failure occurred
         if backup_path and os.path.exists(backup_path):
             shutil.copy2(backup_path, db_path)
             logger.info(f"Restored database to original state from: {backup_path}")
@@ -239,7 +273,175 @@ def migrate_database(db_path: str = DB_PATH) -> Tuple[bool, str]:
             pass
 
 
+def audit_and_migrate_confidence(db_path: str = DB_PATH, backup_first: bool = True) -> Tuple[bool, dict]:
+    """
+    Audit and migrate confidence scores in SQLite database:
+    - [0.0, 1.0]: kept untouched (already canonical probability).
+    - (1.0, 100.0]: normalized to [0.0, 1.0] via normalize_confidence(value).
+    - invalid (<0, >100, NaN, Inf, non-numeric, NULL): moved to `incidents_quarantine` table with reason.
+      NOT clamped to 0 or 1. Quarantined records are safely purged from `incidents`.
+    - runs in atomic transaction with rollback on failure.
+    - creates verified backup first if backup_first=True.
+    Returns: (success: bool, stats: dict).
+    """
+    try:
+        from confidence import normalize_confidence, InvalidConfidenceError
+    except ImportError:
+        from backend.confidence import normalize_confidence, InvalidConfidenceError
+
+    if not os.path.exists(db_path):
+        return False, {"error": f"Database does not exist: {db_path}"}
+
+    backup_path = None
+    if backup_first:
+        try:
+            backup_path = create_verified_backup(db_path)
+        except Exception as e:
+            logger.error(f"Aborting confidence audit: backup creation failed: {e}")
+            return False, {"error": f"Backup creation failed: {e}"}
+
+    conn = sqlite3.connect(db_path)
+    conn.isolation_level = None  # Manual transaction management
+    cursor = conn.cursor()
+
+    stats = {
+        "total_audited": 0,
+        "untouched_canonical": 0,
+        "normalized_legacy": 0,
+        "quarantined_invalid": 0,
+        "backup_path": backup_path,
+    }
+
+    try:
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='incidents';")
+        if not cursor.fetchone():
+            conn.close()
+            return True, stats
+
+        # Ensure quarantine table exists
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS incidents_quarantine (
+            id VARCHAR(100) PRIMARY KEY,
+            source_id VARCHAR(100),
+            source_label VARCHAR(100),
+            source_type VARCHAR(50),
+            session_id VARCHAR(100),
+            track_id INTEGER,
+            violation_type VARCHAR(50),
+            raw_confidence TEXT,
+            quarantine_reason TEXT,
+            quarantined_at TIMESTAMP,
+            level VARCHAR(20),
+            detected_at TIMESTAMP,
+            clip_started_at TIMESTAMP,
+            clip_ended_at TIMESTAMP,
+            video_path VARCHAR(500),
+            snapshot_path VARCHAR(500),
+            status VARCHAR(20),
+            proctor_notes TEXT,
+            created_at TIMESTAMP
+        );
+        """)
+
+        cursor.execute("PRAGMA table_info(incidents);")
+        inc_cols = [r[1] for r in cursor.fetchall()]
+        col_indices = {c: idx for idx, c in enumerate(inc_cols)}
+
+        cursor.execute("SELECT * FROM incidents;")
+        rows = cursor.fetchall()
+        stats["total_audited"] = len(rows)
+
+        updates = []
+        quarantines = []
+
+        now_iso = datetime.now(timezone.utc).isoformat()
+
+        for row in rows:
+            inc_id = row[col_indices["id"]]
+            raw_conf = row[col_indices["confidence"]]
+
+            try:
+                norm_conf = normalize_confidence(raw_conf)
+                # Check if normalization actually changed the value
+                if abs(float(raw_conf) - norm_conf) > 1e-6:
+                    updates.append((norm_conf, inc_id))
+                    stats["normalized_legacy"] += 1
+                else:
+                    stats["untouched_canonical"] += 1
+            except (InvalidConfidenceError, Exception) as err:
+                quarantine_entry = (
+                    inc_id,
+                    row[col_indices["source_id"]] if "source_id" in col_indices else None,
+                    row[col_indices["source_label"]] if "source_label" in col_indices else None,
+                    row[col_indices["source_type"]] if "source_type" in col_indices else None,
+                    row[col_indices["session_id"]] if "session_id" in col_indices else None,
+                    row[col_indices["track_id"]] if "track_id" in col_indices else None,
+                    row[col_indices["violation_type"]] if "violation_type" in col_indices else None,
+                    str(raw_conf),
+                    str(err),
+                    now_iso,
+                    row[col_indices["level"]] if "level" in col_indices else None,
+                    row[col_indices["detected_at"]] if "detected_at" in col_indices else None,
+                    row[col_indices["clip_started_at"]] if "clip_started_at" in col_indices else None,
+                    row[col_indices["clip_ended_at"]] if "clip_ended_at" in col_indices else None,
+                    row[col_indices["video_path"]] if "video_path" in col_indices else None,
+                    row[col_indices["snapshot_path"]] if "snapshot_path" in col_indices else None,
+                    row[col_indices["status"]] if "status" in col_indices else None,
+                    row[col_indices["proctor_notes"]] if "proctor_notes" in col_indices else None,
+                    row[col_indices["created_at"]] if "created_at" in col_indices else None,
+                )
+                quarantines.append((quarantine_entry, inc_id))
+                stats["quarantined_invalid"] += 1
+
+        # Atomic transaction execution
+        cursor.execute("BEGIN IMMEDIATE TRANSACTION;")
+        try:
+            # Apply normalizations
+            if updates:
+                cursor.executemany("UPDATE incidents SET confidence = ? WHERE id = ?;", updates)
+
+            # Move invalid records to quarantine and delete from main incidents table
+            for q_row, inc_id in quarantines:
+                cursor.execute("""
+                INSERT OR REPLACE INTO incidents_quarantine (
+                    id, source_id, source_label, source_type, session_id, track_id,
+                    violation_type, raw_confidence, quarantine_reason, quarantined_at,
+                    level, detected_at, clip_started_at, clip_ended_at, video_path,
+                    snapshot_path, status, proctor_notes, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """, q_row)
+                cursor.execute("DELETE FROM incidents WHERE id = ?;", (inc_id,))
+
+            cursor.execute("COMMIT;")
+            logger.info(
+                f"[CONFIDENCE_MIGRATION] Done: {stats['total_audited']} total, "
+                f"{stats['untouched_canonical']} untouched, {stats['normalized_legacy']} normalized, "
+                f"{stats['quarantined_invalid']} quarantined."
+            )
+            return True, stats
+        except Exception as tx_err:
+            try:
+                cursor.execute("ROLLBACK;")
+            except Exception:
+                pass
+            raise tx_err
+
+    except Exception as e:
+        logger.error(f"[CONFIDENCE_MIGRATION] Failed: {e}", exc_info=True)
+        if backup_path and os.path.exists(backup_path):
+            shutil.copy2(backup_path, db_path)
+            logger.info(f"Restored database from backup {backup_path}")
+        stats["error"] = str(e)
+        return False, stats
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
 if __name__ == "__main__":
     success, msg = migrate_database()
     if not success:
         sys.exit(1)
+    print(f"Result: {msg}")

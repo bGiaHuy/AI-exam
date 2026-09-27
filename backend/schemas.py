@@ -19,6 +19,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 class IncidentResponse(BaseModel):
     id: str
     source_id: str
+    source_label: Optional[str] = "Camera 1"
+    source_type: Optional[str] = "browser_ws"
+    session_id: Optional[str] = None
     track_id: Optional[int] = None
     violation_type: Literal["PHONE", "HEAD_TURNING"]
     confidence: float = Field(..., ge=0.0, le=1.0, description="Độ tin cậy chuẩn hóa (raw probability 0.0 - 1.0)")
@@ -46,21 +49,9 @@ class IncidentResponse(BaseModel):
 
     @field_validator("confidence", mode="before")
     @classmethod
-    def normalize_confidence(cls, v: Any) -> float:
-        if v is None:
-            return 0.0
-        val = float(v)
-        if math.isnan(val) or math.isinf(val):
-            raise ValueError("Confidence cannot be NaN or Infinite")
-        if val < 0.0:
-            raise ValueError("Confidence cannot be negative")
-        # Legacy database records may store percentage e.g. 93.5 or 88.0.
-        # Canonical representation in API is raw probability 0.0 - 1.0.
-        if val > 1.0:
-            if val <= 100.0:
-                return round(val / 100.0, 4)
-            raise ValueError("Confidence cannot exceed 1.0 (or 100.0%)")
-        return round(val, 4)
+    def normalize_confidence_field(cls, v: Any) -> float:
+        from confidence import normalize_confidence
+        return normalize_confidence(v)
 
 
 class IncidentConfirmRequest(BaseModel):
@@ -72,7 +63,7 @@ class IncidentConfirmRequest(BaseModel):
 # 2. AI SETTINGS SCHEMA
 # ==============================================================================
 class AISettingsSchema(BaseModel):
-    phone_confidence: float = Field(0.35, ge=0.1, le=1.0, description="Ngưỡng tin cậy phát hiện điện thoại (raw probability 0.1 - 1.0)")
+    phone_confidence: float = Field(0.55, ge=0.1, le=1.0, description="Ngưỡng tin cậy phát hiện điện thoại (raw probability 0.1 - 1.0)")
     posture_alert_seconds: float = Field(1.25, ge=0.5, le=5.0, description="Thời gian duy trì quay đầu để kích hoạt cờ Đỏ (giây)")
     suspicion_threshold: float = Field(0.50, ge=0.1, le=1.0, description="Ngưỡng điểm nghi vấn tư thế chuẩn hóa kích hoạt cờ Vàng (không thứ nguyên [0.0 - 1.0])")
     pre_roll_seconds: float = Field(5.0, ge=1.0, le=10.0, description="Thời lượng video trước thời điểm vi phạm (giây)")
@@ -153,5 +144,50 @@ class SessionTelemetryResponse(BaseModel):
     detection_results_sent: int = Field(0, description="Alias cho result_messages_sent")
     detected_objects: int = 0
     invariants: Dict[str, bool]
+
+
+# ==============================================================================
+# 5. DUAL-CAMERA & MULTI-SOURCE SCHEMAS (Sprint 3.2)
+# ==============================================================================
+class CameraModeRequest(BaseModel):
+    mode: Literal["SINGLE_CAMERA", "DUAL_CAMERA", "TRIPLE_CAMERA"] = Field(..., description="Chế độ camera: SINGLE_CAMERA, DUAL_CAMERA hoặc TRIPLE_CAMERA")
+
+
+class CameraModeResponse(BaseModel):
+    mode: Literal["SINGLE_CAMERA", "DUAL_CAMERA", "TRIPLE_CAMERA"]
+
+
+
+class CameraSourceInfo(BaseModel):
+    source_id: str
+    source_label: str
+    source_type: str
+    status: str
+    acquisition_fps: float = 0.0
+    inference_fps: float = 0.0
+    frames_received: int = 0
+    frames_submitted: int = 0
+    frames_processed: int = 0
+    frames_superseded: int = 0
+    frames_dropped: int = 0
+    pending_depth: int = 0
+    reconnect_count: int = 0
+    last_frame_at: Optional[datetime] = None
+    session_id: Optional[str] = None
+    ring_buffer_frames: int = 0
+    ring_buffer_bytes: int = 0
+    ring_buffer_oldest_age: float = 0.0
+    ring_buffer_dropped_by_limit: int = 0
+    corrupt_frames_skipped: int = 0
+
+
+class CameraSystemStatusResponse(BaseModel):
+    mode: Literal["SINGLE_CAMERA", "DUAL_CAMERA", "TRIPLE_CAMERA"]
+    cameras: List[CameraSourceInfo]
+    total_online: int
+    scheduler_inference_fps: float = 0.0
+    scheduler_latency_ms: float = 0.0
+    demo_read_only: bool = False
+
 
 

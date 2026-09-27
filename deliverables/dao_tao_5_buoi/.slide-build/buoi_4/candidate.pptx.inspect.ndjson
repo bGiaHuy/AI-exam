@@ -1,0 +1,103 @@
+{"kind":"deck","id":"pr/kco9cc","name":"Deck"}
+{"kind":"layout","layoutId":"acff0f70-fd62-4c61-9cda-c83187d224f3","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"8e94173e-3020-4da5-95a7-d535bf12acbb","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/w8w30w","slide":1,"title":"BUỔI 4","textShapes":5}
+{"kind":"textbox","id":"sh/q54r6tsv","slide":1,"text":"BUỔI 4","textPreview":"BUỔI 4","textChars":6,"textLines":1,"bbox":[70,64,240,38]}
+{"kind":"textbox","id":"sh/d8fqh8rm","slide":1,"text":"Deep Learning, transfer learning và fine-tune","textPreview":"Deep Learning, transfer learning và fine-tune","textChars":45,"textLines":1,"bbox":[70,136,980,160]}
+{"kind":"textbox","id":"sh/c7m983a1","slide":1,"text":"Đọc một run huấn luyện lịch sử thay vì học thuộc thuật ngữ","textPreview":"Đọc một run huấn luyện lịch sử thay vì học thuộc thuật ngữ","textChars":58,"textLines":1,"bbox":[72,316,850,86]}
+{"kind":"shape","id":"sh/3id8by9k","slide":1,"bbox":[72,454,850,0]}
+{"kind":"textbox","id":"sh/2h4r2tsz","slide":1,"text":"Đọc `args.yaml` và `results.csv`, giải thích checkpoint, resume, loss, metric và các kết luận chưa đủ bằng chứng.","textPreview":"Đọc `args.yaml` và `results.csv`, giải thích checkpoint, resume, loss, metric và các kết luận chưa đủ bằng chứng.","textChars":113,"textLines":1,"bbox":[72,478,880,100]}
+{"kind":"textbox","id":"sh/p4vqd8ra","slide":1,"text":"AI EXAM CONTROL · HỌC QUA ARTIFACT CỦA PROJECT","textPreview":"AI EXAM CONTROL · HỌC QUA ARTIFACT CỦA PROJECT","textChars":46,"textLines":1,"bbox":[72,642,800,26]}
+{"kind":"notes","id":"nt/w8w30w","slide":1,"text":"Mục tiêu buổi học: Đọc `args.yaml` và `results.csv`, giải thích checkpoint, resume, loss, metric và các kết luận chưa đủ bằng chứng.\nNguồn nội bộ: deliverables/dao_tao_5_buoi/01_GIAO_AN.md; 11_NGUON_VA_GIOI_HAN.md."}
+{"kind":"slide","id":"sl/z43mhk","slide":2,"title":"Câu hỏi dẫn đường","textShapes":10}
+{"kind":"textbox","id":"sh/b2pkrip0","slide":2,"text":"Câu hỏi dẫn đường","textPreview":"Câu hỏi dẫn đường","textChars":17,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/w3yl0nq5","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/x472t87q","slide":2,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/mxw3ut83","slide":2,"text":"Fine-tune đã làm gì với một model có sẵn, và nhìn log nào để biết việc học đang diễn ra?","textPreview":"Fine-tune đã làm gì với một model có sẵn, và nhìn log nào để biết việc học đang diễn ra?","textChars":88,"textLines":1,"bbox":[82,144,1110,118]}
+{"kind":"textbox","id":"sh/ny5knypo","slide":2,"text":"Cuối buổi, học viên tự làm được","textPreview":"Cuối buổi, học viên tự làm được","textChars":31,"textLines":1,"bbox":[82,300,500,32]}
+{"kind":"textbox","id":"sh/ozelw3q9","slide":2,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[84,356,42,42]}
+{"kind":"textbox","id":"sh/90n2p87u","slide":2,"text":"Kể đúng vòng prediction, loss, gradient, update","textPreview":"Kể đúng vòng prediction, loss, gradient, update","textChars":47,"textLines":1,"bbox":[148,344,990,64]}
+{"kind":"textbox","id":"sh/6t036xon","slide":2,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[84,430,42,42]}
+{"kind":"textbox","id":"sh/7u94z2ps","slide":2,"text":"Phân biệt pretrained, fine-tune, checkpoint và inference","textPreview":"Phân biệt pretrained, fine-tune, checkpoint và inference","textChars":56,"textLines":1,"bbox":[148,418,990,64]}
+{"kind":"textbox","id":"sh/3qxcn2t0","slide":2,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[84,504,42,42]}
+{"kind":"textbox","id":"sh/2pobuxcf","slide":2,"text":"Đọc hyperparameter cùng dấu hiệu overfit","textPreview":"Đọc hyperparameter cùng dấu hiệu overfit","textChars":40,"textLines":1,"bbox":[148,492,990,64]}
+{"kind":"notes","id":"nt/z43mhk","slide":2,"text":"Yêu cầu học viên trả lời câu dẫn đường trước khi dạy. Lặp lại cuối buổi để nhìn sự thay đổi trong cách giải thích."}
+{"kind":"slide","id":"sl/aq64h0","slide":3,"title":"Vòng lặp training","textShapes":18}
+{"kind":"textbox","id":"sh/ut03ixcr","slide":3,"text":"Vòng lặp training","textPreview":"Vòng lặp training","textChars":17,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/hwr2dsv2","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/gvilk7uh","slide":3,"bbox":[64,104,1160,0]}
+{"kind":"shape","id":"sh/7qpk7id0","slide":3,"bbox":[74,210,211,176]}
+{"kind":"textbox","id":"sh/6pg3edcf","slide":3,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[90,224,32,28]}
+{"kind":"textbox","id":"sh/tsr29sv6","slide":3,"text":"Batch","textPreview":"Batch","textChars":5,"textLines":1,"bbox":[90,260,179,52]}
+{"kind":"textbox","id":"sh/srilgnul","slide":3,"text":"Input và label","textPreview":"Input và label","textChars":14,"textLines":1,"bbox":[90,316,179,56]}
+{"kind":"shape","id":"sh/rmt4jmd4","slide":3,"bbox":[301,210,211,176]}
+{"kind":"textbox","id":"sh/qlk3ahcz","slide":3,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[317,224,32,28]}
+{"kind":"textbox","id":"sh/wvy5cn61","slide":3,"text":"Forward","textPreview":"Forward","textChars":7,"textLines":1,"bbox":[317,260,179,52]}
+{"kind":"textbox","id":"sh/xw76lsnm","slide":3,"text":"Model dự đoán","textPreview":"Model dự đoán","textChars":13,"textLines":1,"bbox":[317,316,179,56]}
+{"kind":"shape","id":"sh/a9gnaxov","slide":3,"bbox":[528,210,211,176]}
+{"kind":"textbox","id":"sh/bapoji5g","slide":3,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[544,224,32,28]}
+{"kind":"textbox","id":"sh/o7e58n6p","slide":3,"text":"Loss","textPreview":"Loss","textChars":4,"textLines":1,"bbox":[544,260,179,52]}
+{"kind":"textbox","id":"sh/9876hsna","slide":3,"text":"So với ground truth","textPreview":"So với ground truth","textChars":19,"textLines":1,"bbox":[544,316,179,56]}
+{"kind":"shape","id":"sh/m5wn6doz","slide":3,"bbox":[755,210,211,176]}
+{"kind":"textbox","id":"sh/n65ofi5k","slide":3,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[771,224,32,28]}
+{"kind":"textbox","id":"sh/03e5436t","slide":3,"text":"Gradient","textPreview":"Gradient","textChars":8,"textLines":1,"bbox":[771,260,179,52]}
+{"kind":"textbox","id":"sh/14nmd8ne","slide":3,"text":"Hướng điều chỉnh","textPreview":"Hướng điều chỉnh","textChars":16,"textLines":1,"bbox":[771,316,179,56]}
+{"kind":"shape","id":"sh/hovul0vq","slide":3,"bbox":[982,210,211,176]}
+{"kind":"textbox","id":"sh/gnmdsful","slide":3,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[998,224,32,28]}
+{"kind":"textbox","id":"sh/vmdcjad0","slide":3,"text":"Update","textPreview":"Update","textChars":6,"textLines":1,"bbox":[998,260,179,52]}
+{"kind":"textbox","id":"sh/ul4bq5cf","slide":3,"text":"Đổi weights","textPreview":"Đổi weights","textChars":11,"textLines":1,"bbox":[998,316,179,56]}
+{"kind":"textbox","id":"sh/tkvuh0vu","slide":3,"text":"Inference dừng ở prediction. Fine-tune tiếp tục tính loss và cập nhật weights.","textPreview":"Inference dừng ở prediction. Fine-tune tiếp tục tính loss và cập nhật weights.","textChars":78,"textLines":1,"bbox":[90,446,1080,92]}
+{"kind":"notes","id":"nt/aq64h0","slide":3,"text":"Dùng ví dụ một batch nhỏ. Không dạy chi tiết đạo hàm nếu học viên chưa có nền toán."}
+{"kind":"slide","id":"sl/sghxfg","slide":4,"title":"Run lịch sử của detector điện thoại","textShapes":4}
+{"kind":"textbox","id":"sh/tovet8z2","slide":4,"text":"Run lịch sử của detector điện thoại","textPreview":"Run lịch sử của detector điện thoại","textChars":35,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/6lkfit0b","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/7mtwryhw","slide":4,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/kj2xgjil","slide":4,"text":"task: detect · mode: train\nepochs: 60 · batch: 6 · imgsz: 960\noptimizer: auto · seed: 0\nresume: last.pt · close_mosaic: 10\n\nLog có box loss, cls loss, DFL loss, precision, recall, mAP.\nTime reset trước epoch 6 là dấu vết resume.\n\nInitial pretrained checkpoint: UNRESOLVED\nBest checkpoint source epoch: UNRESOLVED","textPreview":"task: detect · mode: train | epochs: 60 · batch: 6 · imgsz: 960 | optimizer: auto · seed: 0 | resume: last.pt · close_mosaic: 10 |  | Log...","textChars":312,"textLines":10,"bbox":[80,140,1120,420]}
+{"kind":"textbox","id":"sh/lkbepozq","slide":4,"text":"Epoch có mAP50 cao nhất không tự chứng minh đó là epoch sinh checkpoint triển khai.","textPreview":"Epoch có mAP50 cao nhất không tự chứng minh đó là epoch sinh checkpoint triển khai.","textChars":83,"textLines":1,"bbox":[78,604,1110,44]}
+{"kind":"notes","id":"nt/sghxfg","slide":4,"text":"Nguồn: reports/evidence/training_lineage/args.yaml, results.csv, lineage_manifest.json. Artifact chỉ phản ánh run lịch sử."}
+{"kind":"slide","id":"sl/q2n5rs","slide":5,"title":"Thực hành trong lớp","textShapes":16}
+{"kind":"textbox","id":"sh/5cj61cry","slide":5,"text":"Thực hành trong lớp","textPreview":"Thực hành trong lớp","textChars":19,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/i987qx87","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/3a1oz29s","slide":5,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/szapwrq9","slide":5,"text":"Điền phiếu đọc run và chẩn đoán ba đường cong giả định","textPreview":"Điền phiếu đọc run và chẩn đoán ba đường cong giả định","textChars":54,"textLines":1,"bbox":[78,136,1120,72]}
+{"kind":"textbox","id":"sh/d0j65wru","slide":5,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[82,238,42,42]}
+{"kind":"textbox","id":"sh/qds7uh83","slide":5,"text":"Đọc config","textPreview":"Đọc config","textChars":10,"textLines":1,"bbox":[148,232,350,40]}
+{"kind":"textbox","id":"sh/re1o3m9o","slide":5,"text":"Task, model, epoch, batch, image size, optimizer","textPreview":"Task, model, epoch, batch, image size, optimizer","textChars":48,"textLines":1,"bbox":[508,232,650,58]}
+{"kind":"textbox","id":"sh/8jqpknq5","slide":5,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[82,324,42,42]}
+{"kind":"textbox","id":"sh/t4z6tsrq","slide":5,"text":"Đọc log","textPreview":"Đọc log","textChars":7,"textLines":1,"bbox":[148,318,350,40]}
+{"kind":"textbox","id":"sh/9wvul0bq","slide":5,"text":"Loss và metric theo epoch","textPreview":"Loss và metric theo epoch","textChars":25,"textLines":1,"bbox":[508,318,650,58]}
+{"kind":"textbox","id":"sh/ovmtsvu5","slide":5,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[82,410,42,42]}
+{"kind":"textbox","id":"sh/nudcjqtk","slide":5,"text":"Tìm resume","textPreview":"Tìm resume","textChars":10,"textLines":1,"bbox":[148,404,350,40]}
+{"kind":"textbox","id":"sh/mtkbqlcz","slide":5,"text":"Đối chiếu args và time reset","textPreview":"Đối chiếu args và time reset","textChars":28,"textLines":1,"bbox":[508,404,650,58]}
+{"kind":"textbox","id":"sh/x0vupkbm","slide":5,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[82,496,42,42]}
+{"kind":"textbox","id":"sh/wzmtwfah","slide":5,"text":"Đặt giới hạn","textPreview":"Đặt giới hạn","textChars":12,"textLines":1,"bbox":[148,490,350,40]}
+{"kind":"textbox","id":"sh/bydcnatw","slide":5,"text":"Ghi rõ fact, inference và unresolved","textPreview":"Ghi rõ fact, inference và unresolved","textChars":36,"textLines":1,"bbox":[508,490,650,58]}
+{"kind":"textbox","id":"sh/ax4bu5cb","slide":5,"text":"Sản phẩm nộp: phiếu đọc fine-tune run","textPreview":"Sản phẩm nộp: phiếu đọc fine-tune run","textChars":37,"textLines":1,"bbox":[82,614,1090,34]}
+{"kind":"notes","id":"nt/q2n5rs","slide":5,"text":"Dùng phiếu thực hành 12_PHIEU_THUC_HANH.md. Không thao tác trên model, DB hoặc bằng chứng gốc. Không chạy lại training trong khóa chính và không truy cập thư mục model."}
+{"kind":"slide","id":"sl/m540yb","slide":6,"title":"Ba nhầm lẫn cần sửa","textShapes":11}
+{"kind":"textbox","id":"sh/lwfupsji","slide":6,"text":"Ba nhầm lẫn cần sửa","textPreview":"Ba nhầm lẫn cần sửa","textChars":19,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/yt4bexk7","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/zudcn21s","slide":6,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/c7mtcn21","slide":6,"text":"NHẦM 1","textPreview":"NHẦM 1","textChars":6,"textLines":1,"bbox":[82,148,110,30]}
+{"kind":"textbox","id":"sh/xsvulsjm","slide":6,"text":"Mở webcam là fine-tune","textPreview":"Mở webcam là fine-tune","textChars":22,"textLines":1,"bbox":[210,140,930,45]}
+{"kind":"textbox","id":"sh/a54badkv","slide":6,"text":"Đó là inference vì weights không được cập nhật.","textPreview":"Đó là inference vì weights không được cập nhật.","textChars":47,"textLines":1,"bbox":[210,194,930,66]}
+{"kind":"textbox","id":"sh/b6dsji1g","slide":6,"text":"NHẦM 2","textPreview":"NHẦM 2","textChars":6,"textLines":1,"bbox":[82,304,110,30]}
+{"kind":"textbox","id":"sh/w3qtor25","slide":6,"text":"Loss giảm nghĩa thực địa chắc chắn tốt","textPreview":"Loss giảm nghĩa thực địa chắc chắn tốt","textChars":38,"textLines":1,"bbox":[210,296,930,45]}
+{"kind":"textbox","id":"sh/hozuxcjq","slide":6,"text":"Cần validation/test đại diện và phân tích lỗi.","textPreview":"Cần validation/test đại diện và phân tích lỗi.","textChars":46,"textLines":1,"bbox":[210,350,930,66]}
+{"kind":"textbox","id":"sh/9knad4vy","slide":6,"text":"NHẦM 3","textPreview":"NHẦM 3","textChars":6,"textLines":1,"bbox":[82,460,110,30]}
+{"kind":"textbox","id":"sh/8zetkjed","slide":6,"text":"Augmentation tạo đủ mọi điều kiện thật","textPreview":"Augmentation tạo đủ mọi điều kiện thật","textChars":38,"textLines":1,"bbox":[210,452,930,45]}
+{"kind":"textbox","id":"sh/7y5sbeds","slide":6,"text":"Biến đổi ảnh không thay thế dữ liệu mục tiêu được thu đúng cách.","textPreview":"Biến đổi ảnh không thay thế dữ liệu mục tiêu được thu đúng cách.","textChars":64,"textLines":1,"bbox":[210,506,930,66]}
+{"kind":"notes","id":"nt/m540yb","slide":6,"text":"Cho học viên tự sửa câu sai trước khi hiện cách diễn đạt đúng. Không biến slide thành đáp án học thuộc."}
+{"kind":"slide","id":"sl/2d5i8y","slide":7,"title":"Kiểm tra cuối buổi","textShapes":10}
+{"kind":"textbox","id":"sh/7udkbmhg","slide":7,"text":"Kiểm tra cuối buổi","textPreview":"Kiểm tra cuối buổi","textChars":18,"textLines":1,"bbox":[64,34,1100,58]}
+{"kind":"textbox","id":"sh/8vml4ry1","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1180,40,48,34]}
+{"kind":"shape","id":"sh/twv2dwzm","slide":7,"bbox":[64,104,1160,0]}
+{"kind":"textbox","id":"sh/y5kjyxgz","slide":7,"text":"Không nhìn tài liệu. Giải thích bằng lời của em.","textPreview":"Không nhìn tài liệu. Giải thích bằng lời của em.","textChars":48,"textLines":1,"bbox":[78,136,900,48]}
+{"kind":"textbox","id":"sh/j6tk72hk","slide":7,"text":"1.","textPreview":"1.","textChars":2,"textLines":1,"bbox":[84,222,40,44]}
+{"kind":"textbox","id":"sh/k72l07y5","slide":7,"text":"Fine-tune khác inference ở đâu?","textPreview":"Fine-tune khác inference ở đâu?","textChars":31,"textLines":1,"bbox":[132,212,1030,64]}
+{"kind":"textbox","id":"sh/l8v29czq","slide":7,"text":"2.","textPreview":"2.","textChars":2,"textLines":1,"bbox":[84,304,40,44]}
+{"kind":"textbox","id":"sh/a1kjuxg3","slide":7,"text":"Resume từ last.pt chứng minh điều gì?","textPreview":"Resume từ last.pt chứng minh điều gì?","textChars":37,"textLines":1,"bbox":[132,294,1030,64]}
+{"kind":"textbox","id":"sh/b2tk32ho","slide":7,"text":"3.","textPreview":"3.","textChars":2,"textLines":1,"bbox":[84,386,40,44]}
+{"kind":"textbox","id":"sh/32pgjmps","slide":7,"text":"Loss và metric có vai trò khác nhau thế nào?","textPreview":"Loss và metric có vai trò khác nhau thế nào?","textChars":44,"textLines":1,"bbox":[132,376,1030,64]}
+{"kind":"textbox","id":"sh/21gzqho7","slide":7,"text":"Bài nộp: phiếu đọc fine-tune run","textPreview":"Bài nộp: phiếu đọc fine-tune run","textChars":32,"textLines":1,"bbox":[80,636,1080,30]}
+{"kind":"notes","id":"nt/2d5i8y","slide":7,"text":"Chấm theo rubric trong 07_KIEM_TRA.md. Một đáp án đúng nhưng không giải thích được ví dụ mới chỉ đạt tối đa một nửa điểm."}

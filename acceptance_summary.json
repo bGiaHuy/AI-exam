@@ -1,0 +1,152 @@
+{
+  "sprint": "3.2B-R2",
+  "run_id": "sprint32b_r2_20260917_001625",
+  "timestamp": "2026-09-17T00:19:35.755087+00:00",
+  "candidate_verdict": "PASS WITH RESIDUAL RISKS — SOFTWARE/SYNTHETIC ACCEPTANCE",
+  "final_pm_verdict": "PENDING INDEPENDENT ARTIFACT AUDIT",
+  "verdict": "CANDIDATE VERDICT: PASS WITH RESIDUAL RISKS — SOFTWARE/SYNTHETIC ACCEPTANCE | FINAL PM VERDICT: PENDING INDEPENDENT ARTIFACT AUDIT",
+  "acceptance_breakdown": {
+    "total_steps": 16,
+    "passed_steps": 15,
+    "not_configured_steps": 1,
+    "failed_steps": 0,
+    "acceptance_status": "15 PASS, 1 NOT_CONFIGURED, 0 FAIL"
+  },
+  "packaging_and_validation": {
+    "step_id": "STEP-17",
+    "name": "Evidence ZIP Packaging & External Archive Validation",
+    "command": "python scripts/acceptance/package_and_validate_zip_r2.py",
+    "status": "SUCCESS"
+  },
+  "hardware_status": "HARDWARE_ACCEPTANCE: PENDING -- da dat mua 2 webcam EYD PC02, cho nhan thiet bi va kiem thu dong thoi.",
+  "steps": [
+    {
+      "step_id": "STEP-01",
+      "name": "Import Side-Effect & Metadata Audit (3 Checkpoints)",
+      "command": "python scripts/acceptance/audit_import_side_effects.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "import_side_effect_audit.log"
+    },
+    {
+      "step_id": "STEP-02",
+      "name": "Read-Only SQLite Confidence Migration Audit",
+      "command": "python scripts/acceptance/audit_db_migration.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "confidence_migration_audit.log"
+    },
+    {
+      "step_id": "STEP-03",
+      "name": "Backend Aggregate Test Suite (83 tests)",
+      "command": "python -m unittest backend.tests.test_refactored_system backend.tests.test_dual_camera_pipeline backend.tests.test_sprint32b backend.tests.test_preview_transport backend.tests.test_confidence_contract -v",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "backend_all_tests.log"
+    },
+    {
+      "step_id": "STEP-04",
+      "name": "Preview WebSocket Invariants & Deep Integration (8 tests)",
+      "command": "python -m unittest backend.tests.test_preview_transport -v",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "preview_transport.log"
+    },
+    {
+      "step_id": "STEP-05",
+      "name": "Evaluation Harness Mathematical Contract Tests (22 tests)",
+      "command": "python -m unittest scripts.evaluation.tests.test_evaluation_harness -v",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "evaluation_tests.log"
+    },
+    {
+      "step_id": "STEP-06",
+      "name": "Frontend TypeScript Strict Type Check",
+      "command": "npx tsc --noEmit",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "tsc.log"
+    },
+    {
+      "step_id": "STEP-07",
+      "name": "Frontend Telemetry Contract Verification",
+      "command": "npx tsx src/services/__tests__/test_telemetry_contract.ts",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "frontend_telemetry.log"
+    },
+    {
+      "step_id": "STEP-08",
+      "name": "Frontend Dual-Camera Protocol Contract (15 tests)",
+      "command": "npx tsx src/services/__tests__/test_frontend_dual_camera.ts",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "frontend_dual_camera.log"
+    },
+    {
+      "step_id": "STEP-09",
+      "name": "Vite Production Bundle Build",
+      "command": "npm run build",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "build.log"
+    },
+    {
+      "step_id": "STEP-10",
+      "name": "Frontend lint configuration audit — NOT_CONFIGURED",
+      "command": "npm run lint",
+      "status": "NOT_CONFIGURED",
+      "exit_code": 0,
+      "log_file": "lint.log"
+    },
+    {
+      "step_id": "STEP-11",
+      "name": "Dual-Camera Clip Pre/Post-Roll Generation & Audit",
+      "command": "python scripts/acceptance/generate_evidence_clips_r2.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "clip_audit.log"
+    },
+    {
+      "step_id": "STEP-12",
+      "name": "62s Memory Benchmark Scenario A (640x480 @ 15 FPS)",
+      "command": "python scripts/benchmark/benchmark_dual_camera.py --scenario A --duration 62.0",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "benchmark_640x480.log"
+    },
+    {
+      "step_id": "STEP-13",
+      "name": "62s Memory Benchmark Scenario B (1920x1080 @ 15 FPS)",
+      "command": "python scripts/benchmark/benchmark_dual_camera.py --scenario B --duration 62.0",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "benchmark_1920x1080.log"
+    },
+    {
+      "step_id": "STEP-14",
+      "name": "Git Repository Status, Diff & Untracked Evidence Capture",
+      "command": "python scripts/acceptance/capture_git_state_r2.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "git_capture.log"
+    },
+    {
+      "step_id": "STEP-15",
+      "name": "Secret & Credential Leakage Scanner (Fail-Closed)",
+      "command": "python scripts/acceptance/secret_scan_r2.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "secret_scan.log"
+    },
+    {
+      "step_id": "STEP-16",
+      "name": "Artifact Integrity & SHA-256 Manifest Generation",
+      "command": "python scripts/acceptance/validate_artifacts_r2.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "log_file": "artifact_validation.log"
+    }
+  ]
+}
