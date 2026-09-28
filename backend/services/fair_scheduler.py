@@ -264,6 +264,9 @@ class FairInferenceScheduler:
                     peak_frame=frame,
                     proctor_notes=f"AI phát hiện {red_violation_type} trên nguồn {source.source_label} ({source_id})",
                     session_id=session_id,
+                    # Use the acquisition timeline (WebSocket frames use monotonic time).
+                    # Wall-clock fallback would leave post-roll waiting indefinitely.
+                    timestamp=frame_ts,
                     source_label=source.source_label,
                     source_type=source.source_type
                 )
