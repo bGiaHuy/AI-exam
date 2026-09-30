@@ -37,7 +37,8 @@ interface StreamlinedDashboardProps {
   onOpenVideoModal: (incident: Incident) => void;
   onConfirmIncident?: (incidentId: string) => void;
   onDismissIncident?: (incidentId: string) => void;
-  onDeleteIncident?: (incidentId: string) => void;
+  onDeleteIncident?: (incidentId: string) => Promise<boolean>;
+  incidentsRevision?: number;
 }
 
 interface LocalVideoViewportProps {
@@ -100,6 +101,7 @@ export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = 
   onConfirmIncident,
   onDismissIncident,
   onDeleteIncident,
+  incidentsRevision = 0,
 }) => {
   // Video Source & Hardware Elements
   const [sourceType, setSourceType] = useState<'webcam' | 'file'>('webcam');
@@ -136,6 +138,10 @@ export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = 
   const [liveDetections, setLiveDetections] = useState<AIDetectionResult[]>([]);
   const [recentIncidents, setRecentIncidents] = useState<Incident[]>([]);
   const [isPolling, setIsPolling] = useState(false);
+  const [incidentError, setIncidentError] = useState<string | null>(null);
+  const [incidentFeedError, setIncidentFeedError] = useState<string | null>(null);
+  const incidentRequestRef = useRef(0);
+  const incidentMutationRef = useRef(false);
   const [activeIncidentLevel, setActiveIncidentLevel] = useState<'normal' | 'yellow' | 'red'>('normal');
 
   // Multi-Camera Mode (Sprint 3.2 Dual/Triple Camera) & Read-Only Demo
@@ -715,30 +721,37 @@ export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = 
 
   // Polling Incident Feed from SQLite every 2 seconds
   const fetchIncidents = async () => {
+    if (incidentMutationRef.current) return;
     if (DEMO_CONFIG.isDemo) {
       if (recentIncidents.length === 0) {
         setRecentIncidents(MOCK_DEMO_INCIDENTS);
       }
       return;
     }
+    const requestId = ++incidentRequestRef.current;
     try {
       setIsPolling(true);
       const data = await getIncidents({ limit: 30 });
-      if (data && data.length > 0) {
+      if (requestId === incidentRequestRef.current) {
         setRecentIncidents(data);
+        setIncidentFeedError(null);
       }
     } catch (err) {
       console.warn('[Dashboard] Lỗi polling sự cố từ SQLite:', err);
+      if (requestId === incidentRequestRef.current) setIncidentFeedError('Không thể tải sự cố. Kiểm tra kết nối máy chủ rồi làm mới.');
     } finally {
-      setIsPolling(false);
+      if (requestId === incidentRequestRef.current) setIsPolling(false);
     }
   };
 
   useEffect(() => {
     fetchIncidents();
     const timer = setInterval(fetchIncidents, 2000);
-    return () => clearInterval(timer);
-  }, []);
+    return () => {
+      clearInterval(timer);
+      incidentRequestRef.current += 1;
+    };
+  }, [incidentsRevision]);
 
   // File Video Upload Handler
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -766,10 +779,11 @@ export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = 
     try {
       await confirmIncident(incId, { status: 'confirmed' });
       setRecentIncidents(prev => prev.map(i => i.id === incId ? { ...i, status: 'confirmed' } : i));
+      if (onConfirmIncident) onConfirmIncident(incId);
     } catch (err) {
       console.error('Lỗi xác nhận sự cố:', err);
+      setIncidentError('Không thể xác nhận sự cố. Vui lòng thử lại.');
     }
-    if (onConfirmIncident) onConfirmIncident(incId);
   };
 
   const handleDismiss = async (incId: string) => {
@@ -781,37 +795,53 @@ export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = 
     try {
       await confirmIncident(incId, { status: 'dismissed' });
       setRecentIncidents(prev => prev.map(i => i.id === incId ? { ...i, status: 'dismissed' } : i));
+      if (onDismissIncident) onDismissIncident(incId);
     } catch (err) {
       console.error('Lỗi bỏ qua sự cố:', err);
+      setIncidentError('Không thể bỏ qua sự cố. Vui lòng thử lại.');
     }
-    if (onDismissIncident) onDismissIncident(incId);
   };
 
   const handleDeleteIncident = async (incId: string) => {
+    if (incidentMutationRef.current) return;
     if (DEMO_CONFIG.isDemo) {
       setRecentIncidents(prev => prev.filter(i => i.id !== incId));
-      if (onDeleteIncident) onDeleteIncident(incId);
       return;
     }
+    incidentMutationRef.current = true;
+    incidentRequestRef.current += 1;
     try {
-      await deleteIncident(incId);
+      const success = onDeleteIncident ? await onDeleteIncident(incId) : await deleteIncident(incId);
+      if (!success) throw new Error('Chưa xóa được sự cố. Vui lòng thử lại.');
       setRecentIncidents(prev => prev.filter(i => i.id !== incId));
+      setIncidentError(null);
     } catch (err) {
-      console.error('Lỗi xóa sự cố:', err);
+      console.error('[LiveMonitor] Lỗi xóa sự cố:', err);
+      setIncidentError(err instanceof Error ? err.message : 'Lỗi xóa sự cố');
+    } finally {
+      incidentMutationRef.current = false;
+      setIsPolling(false);
     }
-    if (onDeleteIncident) onDeleteIncident(incId);
   };
 
   const handlePurgeAllVideos = async () => {
+    if (incidentMutationRef.current) return;
     if (DEMO_CONFIG.isDemo) {
       setRecentIncidents([]);
       return;
     }
+    incidentMutationRef.current = true;
+    incidentRequestRef.current += 1;
     try {
       await purgeAllIncidentVideos();
       setRecentIncidents([]);
+      setIncidentError(null);
     } catch (err) {
-      console.error('Lỗi dọn sạch toàn bộ video sự cố:', err);
+      console.error('[LiveMonitor] Lỗi dọn sạch toàn bộ video sự cố:', err);
+      setIncidentError(err instanceof Error ? err.message : 'Lỗi dọn sạch bằng chứng');
+    } finally {
+      incidentMutationRef.current = false;
+      setIsPolling(false);
     }
   };
 
@@ -1066,6 +1096,7 @@ export const StreamlinedProctorDashboard: React.FC<StreamlinedDashboardProps> = 
           onDismissIncident={handleDismiss}
           onDeleteIncident={handleDeleteIncident}
           onPurgeAllVideos={handlePurgeAllVideos}
+          error={incidentError || incidentFeedError}
           isReadOnly={isDemoReadOnly}
           onRefresh={fetchIncidents}
           isRefreshing={isPolling}
