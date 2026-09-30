@@ -284,13 +284,11 @@ class FairInferenceScheduler:
                 if dur > 0.001:
                     current_fps = round((len(self._fps_window) - 1) / dur, 2)
                     self.last_inference_fps = current_fps
-                    source.inference_fps = current_fps
 
-            source.inference_slot.mark_processed(len(detections))
-
-            # Update single-slot preview overlay detections
+            # An old inference may complete while this camera reconnects.
             current_level = "red" if has_red else ("yellow" if has_yellow else "normal")
-            source.set_latest_detections(detections, current_level)
+            if not source.record_inference_result(session_id, detections, current_level, self.last_inference_fps):
+                continue
 
             # Build standardized camera result payload
             result_payload: Dict[str, Any] = {

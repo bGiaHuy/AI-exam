@@ -482,14 +482,16 @@ class TestDualCameraPipeline(unittest.TestCase):
     # 19. test_19_session_reset_dual_camera
     # ----------------------------------------------------------------------
     def test_19_session_reset_dual_camera(self):
-        """Verify session reset cleans state across all sources."""
+        """Verify an explicit session reset leaves other sources untouched."""
         camera_manager.set_mode("DUAL_CAMERA")
         cam1 = camera_manager.get_source("cam1")
         cam2 = camera_manager.get_source("cam2")
 
         if cam1:
+            cam1.session_id = "test_reset_sess"
             cam1.frames_received = 50
         if cam2:
+            cam2.session_id = "other_camera_session"
             cam2.frames_received = 40
 
         res = self.client.post("/api/session/reset?session_id=test_reset_sess")
@@ -498,7 +500,8 @@ class TestDualCameraPipeline(unittest.TestCase):
         if cam1:
             self.assertEqual(cam1.frames_received, 0)
         if cam2:
-            self.assertEqual(cam2.frames_received, 0)
+            self.assertEqual(cam2.frames_received, 40)
+            self.assertEqual(cam2.session_id, "other_camera_session")
 
     # ----------------------------------------------------------------------
     # 20. test_20_dual_camera_evidence_retrieval

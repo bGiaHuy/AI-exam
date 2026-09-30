@@ -59,6 +59,14 @@ class IncidentConfirmRequest(BaseModel):
     notes: Optional[str] = Field(None, description="Ghi chú nghiệp vụ của giám thị")
 
 
+class IncidentDeleteResponse(BaseModel):
+    success: bool
+    deleted_files_count: int = 0
+    deleted_records_count: int = 0
+    failed_files: List[str] = Field(default_factory=list)
+    message: str
+
+
 # ==============================================================================
 # 2. AI SETTINGS SCHEMA
 # ==============================================================================

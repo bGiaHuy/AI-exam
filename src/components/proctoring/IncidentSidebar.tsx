@@ -19,6 +19,7 @@ interface IncidentSidebarProps {
   isReadOnly?: boolean;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  error?: string | null;
 }
 
 export const IncidentSidebar: React.FC<IncidentSidebarProps> = ({
@@ -31,6 +32,7 @@ export const IncidentSidebar: React.FC<IncidentSidebarProps> = ({
   isReadOnly = false,
   onRefresh,
   isRefreshing = false,
+  error,
 }) => {
   const [filterSeverity, setFilterSeverity] = useState<'all' | 'red' | 'yellow'>('all');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -61,7 +63,7 @@ export const IncidentSidebar: React.FC<IncidentSidebarProps> = ({
         {/* Right: Filter & Action Buttons */}
         <div className="flex items-center gap-1">
           {/* Purge All Videos Button */}
-          {onPurgeAllVideos && !isReadOnly && incidents.length > 0 && (
+          {onPurgeAllVideos && !isReadOnly && (
             <div className="relative">
               <button
                 type="button"
@@ -159,6 +161,7 @@ export const IncidentSidebar: React.FC<IncidentSidebarProps> = ({
       {/* ========================================================================= */}
       {/* 2. SCROLLABLE INCIDENTS LIST                                              */}
       {/* ========================================================================= */}
+      {error && <p role="alert" className="px-3 py-2 text-xs border bg-zinc-900 border-rose-800 text-rose-300">{error}</p>}
       <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
         {filteredIncidents.length === 0 ? (
           <div className="h-48 flex flex-col items-center justify-center text-center p-4 text-gray-400">
