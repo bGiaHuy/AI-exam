@@ -129,7 +129,7 @@ export async function getIncidents(params?: {
     return data.map(i => mapBackendIncidentToFrontend(i));
   } catch (err) {
     console.warn('[API] Không thể lấy danh sách sự cố:', err);
-    return [];
+    throw err;
   }
 }
 
@@ -164,27 +164,34 @@ export async function deleteIncident(incidentId: string): Promise<boolean> {
       method: 'DELETE',
       headers: { 'Accept': 'application/json' }
     });
-    return res.ok;
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok || result.success !== true) {
+      throw new Error(result.detail || result.message || `Không thể xóa sự cố (HTTP ${res.status})`);
+    }
+    return true;
   } catch (err) {
     console.error('[API] Lỗi xóa sự cố vi phạm:', err);
-    return false;
+    throw err;
   }
 }
 
 /**
  * Xóa toàn bộ video bằng chứng vi phạm và làm sạch dữ liệu
  */
-export async function purgeAllIncidentVideos(): Promise<{ success: boolean; deleted_files_count?: number }> {
+export async function purgeAllIncidentVideos(): Promise<{ success: boolean; deleted_files_count?: number; message?: string }> {
   try {
     const res = await fetch(`${API_BASE_URL}/incidents/videos/purge-all`, {
       method: 'DELETE',
       headers: { 'Accept': 'application/json' }
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok || result.success !== true) {
+      throw new Error(result.detail || result.message || `Không thể xóa bằng chứng (HTTP ${res.status})`);
+    }
+    return result;
   } catch (err) {
     console.error('[API] Lỗi xóa toàn bộ video sự cố:', err);
-    return { success: false };
+    throw err;
   }
 }
 

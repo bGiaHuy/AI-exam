@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Incident, 
   AISettings, 
@@ -7,7 +7,6 @@ import {
 import { 
   getAISettings, 
   updateAISettings, 
-  confirmIncident,
   deleteIncident 
 } from './services/api';
 
@@ -52,6 +51,8 @@ export default function App() {
   // Evidence Video Modal State
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [selectedVideoIncident, setSelectedVideoIncident] = useState<Incident | null>(null);
+  const [incidentsRevision, setIncidentsRevision] = useState(0);
+  const deletionInFlight = useRef(false);
 
   // Quick Notification Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -85,32 +86,27 @@ export default function App() {
 
   // Incident Actions
   const handleConfirmIncident = async (incidentId: string) => {
-    try {
-      await confirmIncident(incidentId, { status: 'confirmed' });
-      showToast('Đã xác nhận sự cố vi phạm');
-    } catch (err) {
-      console.warn('[App] Lỗi xác nhận vi phạm:', err);
-      showToast('Lỗi khi xác nhận vi phạm');
-    }
+    showToast('Đã xác nhận sự cố vi phạm');
   };
 
   const handleDismissIncident = async (incidentId: string) => {
-    try {
-      await confirmIncident(incidentId, { status: 'dismissed' });
-      showToast('Đã bỏ qua sự cố');
-    } catch (err) {
-      console.warn('[App] Lỗi bỏ qua vi phạm:', err);
-      showToast('Lỗi khi bỏ qua sự cố');
-    }
+    showToast('Đã bỏ qua sự cố');
   };
 
   const handleDeleteIncident = async (incidentId: string) => {
+    if (deletionInFlight.current) return false;
+    deletionInFlight.current = true;
     try {
-      await deleteIncident(incidentId);
+      if (!DEMO_CONFIG.isDemo) await deleteIncident(incidentId);
+      setIncidentsRevision(value => value + 1);
       showToast('Đã xóa tệp video sự cố thành công');
+      return true;
     } catch (err) {
       console.warn('[App] Lỗi xóa video sự cố:', err);
-      showToast('Lỗi khi xóa video sự cố');
+      showToast(err instanceof Error ? err.message : 'Lỗi khi xóa video sự cố');
+      return false;
+    } finally {
+      deletionInFlight.current = false;
     }
   };
 
@@ -159,6 +155,7 @@ export default function App() {
               onConfirmIncident={handleConfirmIncident}
               onDismissIncident={handleDismissIncident}
               onDeleteIncident={handleDeleteIncident}
+              incidentsRevision={incidentsRevision}
             />
           )}
 

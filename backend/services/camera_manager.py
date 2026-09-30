@@ -57,6 +57,7 @@ class CameraManager:
         self._mode: str = "SINGLE_CAMERA"
         self._sources: Dict[str, BaseCameraSource] = {}
         self._initialized = False
+        self._ring_buffer_settings: Dict[str, float] = {}
 
     def initialize(self):
         """Initializes sources from environment variables."""
@@ -113,6 +114,12 @@ class CameraManager:
 
             logger.info(f"[CAMERA_MANAGER] Initializing in {self._mode} mode.")
 
+            from routers.settings import load_settings
+            from services.ring_buffer import ring_buffer_service
+            cfg = load_settings()
+            self.update_ring_buffer_settings(cfg.pre_roll_seconds, cfg.post_roll_seconds, cfg.cooldown_seconds)
+            ring_buffer_service.update_settings(**self._ring_buffer_settings)
+
             # Create Camera 1
             source1 = self._create_source("cam1", cam1_label, cam1_type, cam1_url)
             self._sources["cam1"] = source1
@@ -139,20 +146,33 @@ class CameraManager:
         """Factory creating appropriate camera source."""
         if source_type == "rtsp" and url:
             logger.info(f"[CAMERA_MANAGER] Created RTSP source {source_id} ({label}): {redact_url(url)}")
-            return RtspCameraSource(source_id=source_id, source_label=label, rtsp_url=url)
+            source = RtspCameraSource(source_id=source_id, source_label=label, rtsp_url=url)
         elif source_type == "usb":
             device_idx = 0
             if url and url.isdigit():
                 device_idx = int(url)
             logger.info(f"[CAMERA_MANAGER] Created USB source {source_id} ({label}) on index {device_idx}")
-            return UsbCameraSource(source_id=source_id, source_label=label, device_index=device_idx)
+            source = UsbCameraSource(source_id=source_id, source_label=label, device_index=device_idx)
         elif source_type == "synthetic":
             logger.info(f"[CAMERA_MANAGER] Created Synthetic test source {source_id} ({label})")
-            return SyntheticCameraSource(source_id=source_id, source_label=label)
+            source = SyntheticCameraSource(source_id=source_id, source_label=label)
         else:
             # Default to BrowserWebSocketSource
             logger.info(f"[CAMERA_MANAGER] Created Browser WebSocket source {source_id} ({label})")
-            return BrowserWebSocketSource(source_id=source_id, source_label=label)
+            source = BrowserWebSocketSource(source_id=source_id, source_label=label)
+        source.ring_buffer.update_settings(**self._ring_buffer_settings)
+        return source
+
+    def update_ring_buffer_settings(self, pre_roll_seconds: float, post_roll_seconds: float, cooldown_seconds: float):
+        """Apply settings to existing sources and retain them for later sources."""
+        with self._lock:
+            self._ring_buffer_settings = dict(pre_roll_seconds=pre_roll_seconds,
+                                             post_roll_seconds=post_roll_seconds,
+                                             cooldown_seconds=cooldown_seconds)
+            for source in self._sources.values():
+                source.ring_buffer.update_settings(**self._ring_buffer_settings)
+            logger.info("[CAMERA_MANAGER] Applied recording settings to %s sources: %s",
+                        len(self._sources), self._ring_buffer_settings)
 
     def _update_scheduler_sources(self):
         """Updates fair scheduler with currently active sources."""
@@ -230,6 +250,7 @@ class CameraManager:
     def register_custom_source(self, source: BaseCameraSource):
         """Allows injecting test/synthetic sources for automated testing."""
         with self._lock:
+            source.ring_buffer.update_settings(**self._ring_buffer_settings)
             self._sources[source.source_id] = source
             source.start()
             self._update_scheduler_sources()
@@ -269,8 +290,19 @@ class CameraManager:
     def reset_session(self, session_id: Optional[str] = None):
         with self._lock:
             for s in self._sources.values():
-                s.reset_session(session_id)
-            logger.info(f"[CAMERA_MANAGER] Reset session across all sources: {session_id}")
+                if session_id is None or session_id == "all" or s.session_id == session_id:
+                    s.reset_session()
+                    logger.info("[CAMERA_MANAGER] Reset source=%s session=%s", s.source_id, session_id)
+
+    def begin_session(self, source_id: str, session_id: str):
+        """Switch only the source that owns the new browser connection."""
+        with self._lock:
+            source = self.get_source(source_id)
+            if source is None:
+                source = self._create_source(source_id, f"Camera {source_id}", "browser_ws", "")
+                self.register_custom_source(source)
+            source.reset_session(session_id)
+            logger.info("[CAMERA_MANAGER] Begin source=%s session=%s", source_id, session_id)
 
     def shutdown(self):
         with self._lock:

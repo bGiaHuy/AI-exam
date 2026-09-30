@@ -8,7 +8,6 @@ Zero personal identity information.
 """
 
 import os
-import glob
 import logging
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -16,12 +15,19 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import Incident
-from schemas import IncidentResponse, IncidentConfirmRequest
+from schemas import IncidentResponse, IncidentConfirmRequest, IncidentDeleteResponse
 from routers.ai_engine import verify_write_allowed
+from services.evidence_files import delete_evidence
 
 logger = logging.getLogger(__name__)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("[%(asctime)s] [%(levelname)s] [%(name)s]: %(message)s"))
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
 
 router = APIRouter(prefix="/incidents", tags=["Incidents"])
+EVIDENCE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "evidence"))
 
 
 @router.get("", response_model=List[IncidentResponse])
@@ -85,7 +91,7 @@ def confirm_incident(
     return incident
 
 
-@router.delete("/videos/purge-all", dependencies=[Depends(verify_write_allowed)])
+@router.delete("/videos/purge-all", response_model=IncidentDeleteResponse, dependencies=[Depends(verify_write_allowed)])
 def purge_all_incident_videos(
     db: Session = Depends(get_db)
 ):
@@ -93,35 +99,11 @@ def purge_all_incident_videos(
     Xoá toàn bộ các tệp video bằng chứng vi phạm trên ổ đĩa và cập nhật CSDL.
     Tuyệt đối không lưu lại video trên ổ cứng hay đẩy lên kho lưu trữ GitHub.
     """
-    evidence_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "evidence"))
-    deleted_files = 0
-    if os.path.isdir(evidence_dir):
-        for ext in ("*.mp4", "*.avi", "*.mov", "*.webm", "*.mkv", "*.jpg", "*.png"):
-            for f in glob.glob(os.path.join(evidence_dir, ext)):
-                try:
-                    os.remove(f)
-                    deleted_files += 1
-                except Exception as e:
-                    logger.warning(f"[PURGE_ALL_VIDEOS] Lỗi xoá file {f}: {e}")
-
-    try:
-        deleted_records = db.query(Incident).delete()
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        deleted_records = 0
-        logger.error(f"[PURGE_ALL_VIDEOS] Lỗi cập nhật CSDL: {e}")
-
-    logger.info(f"[PURGE_ALL_VIDEOS] Đã xoá {deleted_files} tệp và {deleted_records} bản ghi sự cố.")
-    return {
-        "success": True, 
-        "deleted_files_count": deleted_files,
-        "deleted_records_count": deleted_records,
-        "message": f"Đã xoá sạch {deleted_files} tệp video và hình ảnh bằng chứng khỏi hệ thống."
-    }
+    logger.info("[PURGE_ALL_VIDEOS] Requested deletion of all completed evidence")
+    return _delete_evidence_response(db)
 
 
-@router.delete("/{incident_id}", dependencies=[Depends(verify_write_allowed)])
+@router.delete("/{incident_id}", response_model=IncidentDeleteResponse, dependencies=[Depends(verify_write_allowed)])
 def delete_incident(
     incident_id: str,
     db: Session = Depends(get_db)
@@ -129,35 +111,16 @@ def delete_incident(
     """
     Xoá vĩnh viễn sự cố vi phạm và file video/ảnh bằng chứng liên quan trên ổ đĩa.
     """
-    incident = db.query(Incident).filter(Incident.id == incident_id).first()
-    if not incident:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Không tìm thấy sự cố với mã '{incident_id}'."
-        )
+    logger.info("[DELETE_INCIDENT] Requested incident_id=%s", incident_id)
+    return _delete_evidence_response(db, incident_id)
 
-    evidence_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "evidence"))
-    # Delete video file
-    if incident.video_path:
-        filename = os.path.basename(incident.video_path)
-        video_full_path = os.path.join(evidence_dir, filename)
-        if os.path.isfile(video_full_path):
-            try:
-                os.remove(video_full_path)
-            except Exception as e:
-                logger.warning(f"[DELETE_INCIDENT] Không thể xoá video file {video_full_path}: {e}")
 
-    # Delete snapshot file
-    if incident.snapshot_path:
-        filename = os.path.basename(incident.snapshot_path)
-        snap_full_path = os.path.join(evidence_dir, filename)
-        if os.path.isfile(snap_full_path):
-            try:
-                os.remove(snap_full_path)
-            except Exception as e:
-                logger.warning(f"[DELETE_INCIDENT] Không thể xoá snapshot file {snap_full_path}: {e}")
-
-    db.delete(incident)
-    db.commit()
-    logger.info(f"[DELETE_INCIDENT] Đã xoá sự cố '{incident_id}' và các tệp liên quan.")
-    return {"success": True, "message": f"Đã xoá sự cố '{incident_id}'."}
+def _delete_evidence_response(db: Session, incident_id: Optional[str] = None):
+    try:
+        result = delete_evidence(db, EVIDENCE_DIR, incident_id)
+    except Exception:
+        logger.exception("[DELETE_INCIDENT] Deletion failed incident_id=%s", incident_id or "all")
+        raise HTTPException(status_code=500, detail="Không hoàn tất xóa bằng chứng. Vui lòng thử lại; kiểm tra log nếu lỗi tiếp diễn.")
+    if result is None:
+        raise HTTPException(status_code=404, detail=f"Không tìm thấy sự cố với mã '{incident_id}'.")
+    return result

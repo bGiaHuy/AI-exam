@@ -43,6 +43,7 @@ EVIDENCE_DIR = os.path.join(BASE_DIR, "data", "evidence")
 os.makedirs(EVIDENCE_DIR, exist_ok=True)
 
 from services.db_queue import db_write_queue
+from services.evidence_files import evidence_file_lock
 
 
 def validate_video_file(video_path: str) -> bool:
@@ -146,6 +147,8 @@ class VideoRingBuffer:
         # Cooldown dictionary keyed by (session_id, source_id, track_id, violation_type)
         self.last_incident_time_by_key: Dict[Tuple[str, str, str, str], float] = {}
         self.last_completed_clip_metrics: Dict[str, Any] = {}
+        # Late inference results must not leave a recording waiting on a closed stream.
+        self._ended_sessions: deque = deque(maxlen=256)
 
     def update_settings(
         self,
@@ -172,24 +175,44 @@ class VideoRingBuffer:
                 f"max_bytes={self.max_bytes}, max_frames={self.max_frames}"
             )
 
-    def reset_session(self, session_id: str):
-        """Clear all buffered frames, active tasks, and cooldowns for a specific session."""
+    def reset_session(self, session_id: Optional[str]):
+        """Finish pending evidence before clearing a session's acquisition state."""
         with self.lock:
-            to_del_cd = [k for k in self.last_incident_time_by_key if k[0] == session_id]
+            reset_all = session_id is None or session_id == "all"
+            sessions = {t.session_id for t in self.active_tasks} if reset_all else {session_id}
+            sessions.update(item[3] for item in self.frame_buffer if reset_all)
+            self._ended_sessions.extend(s for s in sessions if s is not None)
+            to_del_cd = [k for k in self.last_incident_time_by_key if reset_all or k[0] == session_id]
             for k in to_del_cd:
                 del self.last_incident_time_by_key[k]
 
-            self.active_tasks = [t for t in self.active_tasks if t.session_id != session_id]
+            for task in list(self.active_tasks):
+                if reset_all or task.session_id == session_id:
+                    self._finish_task_locked(task, interrupted=True)
             new_buffer = deque()
             new_bytes = 0
             for item in self.frame_buffer:
                 sess = item[3] if len(item) > 3 else None
-                if sess != session_id:
+                if not reset_all and sess != session_id:
                     new_buffer.append(item)
                     new_bytes += len(item[1]) if isinstance(item[1], bytes) else getattr(item[1], "nbytes", 0)
             self.frame_buffer = new_buffer
             self.total_bytes = new_bytes
-            logger.info(f"[RING_BUFFER] Cleared session buffer, tasks, and cooldown for session={session_id}")
+            logger.info(f"[RING_BUFFER] Finalized pending clips and cleared acquisition state for session={session_id}")
+
+    def _finish_task_locked(self, task: VideoClipTask, interrupted: bool = False):
+        if task.state != "RECORDING_POST":
+            return
+        if interrupted:
+            note = "Nguồn camera đã ngắt/reset trước khi đủ post-roll; clip giữ lại các khung hình đã nhận."
+            task.proctor_notes = f"{task.proctor_notes or ''} {note}".strip()
+            logger.warning("[RING_BUFFER] Finalizing interrupted evidence incident=%s session=%s frames=%s",
+                           task.incident_id, task.session_id, len(task.timed_frames))
+        task.state = "SAVING"
+        if task in self.active_tasks:
+            self.active_tasks.remove(task)
+        threading.Thread(target=self._render_and_persist_clip, args=(task,),
+                         name=f"Worker-{task.incident_id}", daemon=True).start()
 
     def _current_state_locked(self) -> str:
         if any(t.state == "SAVING" for t in self.active_tasks):
@@ -255,6 +278,8 @@ class VideoRingBuffer:
         byte_size = len(payload) if isinstance(payload, bytes) else getattr(payload, "nbytes", 0)
 
         with self.lock:
+            while session_id in self._ended_sessions:
+                self._ended_sessions.remove(session_id)
             # 1. Maintain time-based rolling buffer: (timestamp, payload, sequence_id, session_id, source_id, width, height)
             self.frame_buffer.append((now, payload, sequence_id, session_id, source_id, w, h))
             self.total_bytes += byte_size
@@ -291,18 +316,11 @@ class VideoRingBuffer:
                     task.timed_frames.append((now, payload, sequence_id, session_id, source_id, w, h))
 
                     if now >= task.post_end_time:
-                        task.state = "SAVING"
                         completed_tasks.append(task)
 
             # 6. Hand off completed tasks to background thread
             for task in completed_tasks:
-                self.active_tasks.remove(task)
-                threading.Thread(
-                    target=self._render_and_persist_clip,
-                    args=(task,),
-                    name=f"Worker-{task.incident_id}",
-                    daemon=True
-                ).start()
+                self._finish_task_locked(task)
 
     def trigger_incident(
         self,
@@ -389,9 +407,18 @@ class VideoRingBuffer:
             )
             self.active_tasks.append(task)
             self.tasks_by_id[incident_id] = task
+            if session_id in self._ended_sessions:
+                # Inference can finish after disconnect cleanup. Preserve its peak frame.
+                if not task.timed_frames and isinstance(frame_to_use, np.ndarray) and frame_to_use.size:
+                    task.timed_frames.append((trigger_time, frame_to_use.copy()))
+                self._finish_task_locked(task, interrupted=True)
             return incident_id
 
     def _render_and_persist_clip(self, task: VideoClipTask):
+        with evidence_file_lock:
+            self._render_and_persist_clip_locked(task)
+
+    def _render_and_persist_clip_locked(self, task: VideoClipTask):
         """
         Background Worker:
         1. Decodes JPEG frames safely and skips corrupted frames without crashing.
@@ -575,6 +602,7 @@ class VideoRingBuffer:
         except Exception as e:
             logger.error(f"[RING_BUFFER] Exception rendering clip {task.incident_id}: {e}", exc_info=True)
         finally:
+            task.state = "COMPLETED" if task.output_video_path else "FAILED"
             task.completion_event.set()
 
     def wait_for_incident_clip(self, incident_id: str, timeout: float = 20.0) -> Optional[Dict[str, Any]]:
