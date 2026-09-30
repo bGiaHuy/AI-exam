@@ -18,6 +18,7 @@ import time
 import math
 import logging
 import threading
+import uuid
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Optional, Dict, Any, Tuple, Callable
@@ -347,6 +348,7 @@ class BaseCameraSource(ABC):
         with self._lock:
             if not self._running and self.status == CameraStatus.STOPPED:
                 return False
+            frame_session_id = self.session_id
 
             self.frames_received += 1
             seq = sequence_id if sequence_id is not None else self.frames_received
@@ -372,30 +374,33 @@ class BaseCameraSource(ABC):
         success, encoded = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), self.ring_buffer.jpeg_quality])
         jpeg_bytes = encoded.tobytes() if success else b""
 
-        # 2. Feed RingBuffer (compressed JPEG representation)
-        self.ring_buffer.push_frame(
-            frame=None,
-            jpeg_bytes=jpeg_bytes,
-            frame_shape=(h, w),
-            timestamp=now_ts,
-            source_id=self.source_id,
-            sequence_id=seq,
-            session_id=self.session_id
-        )
-
-        # 3. Feed single-slot preview
-        if jpeg_bytes:
-            self.set_latest_preview(jpeg_bytes, now_ts, seq)
-
-        # 4. Push raw frame to Single-Slot Inference Buffer (zero backlog, full resolution)
-        self.inference_slot.push(
-            frame=frame,
-            timestamp=now_ts,
-            sequence_id=seq,
-            session_id=self.session_id,
-            callback=callback
-        )
+        with self._lock:
+            if frame_session_id != self.session_id:
+                logger.info("[CAMERA_SOURCE:%s] Dropped frame from ended session=%s", self.source_id, frame_session_id)
+                return False
+            # Keep publication atomic with a session reset.
+            self.ring_buffer.push_frame(
+                frame=None, jpeg_bytes=jpeg_bytes, frame_shape=(h, w), timestamp=now_ts,
+                source_id=self.source_id, sequence_id=seq, session_id=frame_session_id
+            )
+            if jpeg_bytes:
+                self.set_latest_preview(jpeg_bytes, now_ts, seq)
+            self.inference_slot.push(
+                frame=frame, timestamp=now_ts, sequence_id=seq,
+                session_id=frame_session_id, callback=callback
+            )
         return True
+
+    def record_inference_result(self, session_id: str, detections: list, level: str, fps: float) -> bool:
+        """Prevent an in-flight result from repopulating a source after reset."""
+        with self._lock:
+            if self.session_id != session_id:
+                logger.info("[CAMERA_SOURCE:%s] Ignored result from ended session=%s", self.source_id, session_id)
+                return False
+            self.inference_fps = fps
+            self.inference_slot.mark_processed(len(detections))
+            self.set_latest_detections(detections, level)
+            return True
 
     def get_telemetry(self) -> Dict[str, Any]:
         """Returns per-camera telemetry without secrets."""
@@ -428,7 +433,11 @@ class BaseCameraSource(ABC):
     def reset_session(self, new_session_id: Optional[str] = None):
         """Reset state and counters for a new session."""
         with self._lock:
-            self.session_id = new_session_id or f"sess_{int(time.time()*1000)}_{self.source_id}"
+            previous_session_id = self.session_id
+            self.ring_buffer.reset_session(previous_session_id)
+            from services.temporal_tracker import temporal_posture_tracker
+            temporal_posture_tracker.reset_session(previous_session_id)
+            self.session_id = new_session_id or f"sess_{uuid.uuid4().hex}_{self.source_id}"
             self.frames_received = 0
             self.frames_dropped = 0
             self.acquisition_fps = 0.0
@@ -437,14 +446,13 @@ class BaseCameraSource(ABC):
             self.first_frame_monotonic = None
             self.last_frame_monotonic = None
             self.last_frame_at = None
-            self.ring_buffer.reset_session(self.session_id)
             self.inference_slot.reset()
-        with self._preview_lock:
-            self._latest_preview_jpeg = None
-            self._latest_preview_seq = -1
-            self._latest_preview_ts = 0.0
-            self._latest_detections.clear()
-            self._latest_level = "normal"
+            with self._preview_lock:
+                self._latest_preview_jpeg = None
+                self._latest_preview_seq = -1
+                self._latest_preview_ts = 0.0
+                self._latest_detections.clear()
+                self._latest_level = "normal"
 
 
 class BrowserWebSocketSource(BaseCameraSource):

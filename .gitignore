@@ -37,6 +37,7 @@ test_*.db
 *.flv
 *.m2ts
 data/evidence/*
+data/.evidence-trash/
 !data/evidence/.gitkeep
 
 # Runtime local settings (preserve example)

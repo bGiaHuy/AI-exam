@@ -8,7 +8,7 @@ interface VideoEvidenceModalProps {
   incident: Incident | null;
   isOpen: boolean;
   onClose: () => void;
-  onDeleteVideo?: (incidentId: string) => void;
+  onDeleteVideo?: (incidentId: string) => Promise<boolean>;
 }
 
 export const VideoEvidenceModal: React.FC<VideoEvidenceModalProps> = ({
@@ -18,6 +18,7 @@ export const VideoEvidenceModal: React.FC<VideoEvidenceModalProps> = ({
   onDeleteVideo,
 }) => {
   const [isLooping, setIsLooping] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   if (!isOpen || !incident) return null;
@@ -133,10 +134,15 @@ export const VideoEvidenceModal: React.FC<VideoEvidenceModalProps> = ({
           <div className="flex items-center gap-2">
             {onDeleteVideo && (
               <button
-                onClick={() => {
+                disabled={isDeleting}
+                onClick={async () => {
                   if (window.confirm(`Xác nhận xóa vĩnh viễn video sự cố #${incident.id}? Tệp video trên máy chủ/ổ đĩa sẽ bị xóa và không thể khôi phục.`)) {
-                    onDeleteVideo(incident.id);
-                    onClose();
+                    setIsDeleting(true);
+                    try {
+                      if (await onDeleteVideo(incident.id)) onClose();
+                    } finally {
+                      setIsDeleting(false);
+                    }
                   }
                 }}
                 className="px-3 py-1.5 rounded bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 hover:text-rose-100 text-xs font-medium border border-rose-800/80 flex items-center gap-1.5 transition-colors cursor-pointer"

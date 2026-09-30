@@ -131,19 +131,21 @@ def reset_ai_session_state(session_id: Optional[str] = None):
     """
     Hardened Session Isolation (Sprint 1.2A/1.2B):
     Resets all ephemeral runtime state for a session to prevent state leakage:
-    1. Resets ExamBehaviorDetector (AdaptiveMonitor baseline, EMA keypoint smoothers).
-    2. Resets Ultralytics YOLO ByteTracker so track IDs restart cleanly from 1.
+    1. Resets shared detector/ByteTrack only for an explicit reset of all sources.
+    2. Scoped resets leave other cameras and the shared model's state intact.
     3. Resets TemporalPostureTracker state for the given session.
     4. Discards any waiting frame and resets counters in SingleSlotInferenceBuffer for this session.
-    5. Discards any buffered frames and active tasks in RingBuffer for this session.
+    5. Finishes pending evidence before clearing the session's recording buffer.
     """
     global detector
-    if detector is not None:
+    reset_all = session_id is None or session_id == "all"
+    # The model is shared: a camera reconnect must not reset other cameras' tracking.
+    if reset_all and detector is not None:
         try:
             detector.reset()
             logger.info("[SESSION_ISOLATION] Reset ExamBehaviorDetector monitor baseline & smoothers.")
-        except Exception as e:
-            logger.warning(f"[SESSION_ISOLATION] detector.reset() error: {e}")
+        except Exception:
+            logger.exception("[SESSION_ISOLATION] detector.reset() failed")
 
         try:
             if hasattr(detector, "pose_model") and hasattr(detector.pose_model, "predictor") and detector.pose_model.predictor:
@@ -152,10 +154,10 @@ def reset_ai_session_state(session_id: Optional[str] = None):
                     if hasattr(trk, "reset"):
                         trk.reset()
                         logger.info("[SESSION_ISOLATION] Reset Ultralytics BYTETracker state.")
-        except Exception as e:
-            logger.warning(f"[SESSION_ISOLATION] ByteTracker reset error: {e}")
+        except Exception:
+            logger.exception("[SESSION_ISOLATION] ByteTracker reset failed")
 
-    if session_id:
+    if not reset_all:
         temporal_posture_tracker.reset_session(session_id)
         inference_buffer.reset_session(session_id)
         ring_buffer_service.reset_session(session_id)
@@ -163,6 +165,7 @@ def reset_ai_session_state(session_id: Optional[str] = None):
     else:
         temporal_posture_tracker.clear()
         inference_buffer.reset_session(None)
+        ring_buffer_service.reset_session(None)
         camera_manager.reset_session(None)
 
     logger.info(f"[SESSION_ISOLATION] Successfully completed state isolation for session={session_id}")
@@ -171,19 +174,24 @@ def reset_ai_session_state(session_id: Optional[str] = None):
 @router.post("/session/reset", response_model=SessionResetResponse, dependencies=[Depends(verify_write_allowed)])
 def api_reset_session(session_id: Optional[str] = None):
     """Explicitly reset and isolate AI session state for the active session."""
-    global _active_ws_session_id
+    logger.info("[SESSION_RESET] Requested session=%s", session_id or "all")
     with _session_mutex:
-        if session_id and _active_ws_session_id and session_id != _active_ws_session_id:
-            logger.warning(f"[SESSION_RESET] Reject reset for inactive session '{session_id}'; active is '{_active_ws_session_id}'")
+        active_sessions = set(_active_ws_sessions.values())
+        if _active_ws_session_id:
+            active_sessions.add(_active_ws_session_id)
+        if session_id and active_sessions and session_id not in active_sessions:
+            logger.warning(f"[SESSION_RESET] Reject reset for inactive session '{session_id}'; active sessions are {active_sessions}")
             return SessionResetResponse(
                 status="IGNORED",
                 reset_session=session_id,
-                message=f"Session '{session_id}' is not the currently active session ('{_active_ws_session_id}')"
+                message=f"Session '{session_id}' is not the currently active session"
             )
-        target = session_id if session_id else (_active_ws_session_id or "all")
+        target = session_id or "all"
         reset_ai_session_state(target)
-        if _active_ws_session_id == target or target == "all":
-            _active_ws_session_id = None
+        # Keep connection ownership until disconnect; reset does not close a socket.
+        for source_id, active_session in _active_ws_sessions.items():
+            if target == "all" or active_session == target:
+                camera_manager.begin_session(source_id, active_session)
         return SessionResetResponse(
             status="SUCCESS",
             reset_session=target,
@@ -393,8 +401,9 @@ async def websocket_ingest(
             _active_ws_sessions[norm_source_id] = active_session_id
             is_current_session_owner = True
         else:
-            if norm_source_id in _active_ws_sessions:
-                logger.warning(f"[WS_INGEST] Rejected concurrent session '{active_session_id}' for source '{norm_source_id}': Active session is '{_active_ws_sessions[norm_source_id]}'")
+            if norm_source_id in _active_ws_sessions or active_session_id in _active_ws_sessions.values():
+                logger.warning("[WS_INGEST] Rejected occupied source or duplicate session: source=%s session=%s",
+                               norm_source_id, active_session_id)
                 await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason=f"Another ingestion session for {norm_source_id} is currently active")
                 return
             _active_ws_sessions[norm_source_id] = active_session_id
@@ -406,6 +415,7 @@ async def websocket_ingest(
     loop = asyncio.get_running_loop()
     is_session_active = True
     reset_ai_session_state(active_session_id)
+    camera_manager.begin_session(norm_source_id, active_session_id)
     logger.info(f"[WS_INGEST] Client connected: source={source_id}, session={active_session_id}")
 
     server_packets_received = 0
@@ -422,7 +432,7 @@ async def websocket_ingest(
         if payload.get("session_id") != active_session_id:
             return
         try:
-            if camera_manager.mode == "DUAL_CAMERA":
+            if camera_manager.mode in ("DUAL_CAMERA", "TRIPLE_CAMERA"):
                 cam_source = camera_manager.get_source(norm_source_id)
                 stats = cam_source.inference_slot.get_stats() if cam_source else {}
             else:
@@ -553,12 +563,11 @@ async def websocket_ingest(
                 "gaps_gt_250ms": gaps_gt_250ms,
             }
 
-            if camera_manager.mode == "DUAL_CAMERA":
+            if camera_manager.mode in ("DUAL_CAMERA", "TRIPLE_CAMERA"):
                 cam_source = camera_manager.get_source(norm_source_id)
                 if cam_source is None:
                     cam_source = camera_manager._create_source(norm_source_id, f"Camera {norm_source_id}", "browser_ws", "")
                     camera_manager.register_custom_source(cam_source)
-                cam_source.session_id = active_session_id
                 cam_source.push_frame(
                     frame=frame,
                     timestamp=server_received_monotonic,
@@ -606,7 +615,7 @@ async def websocket_ingest(
                 p95 = round(sorted_int[min(len(sorted_int) - 1, int(len(sorted_int) * 0.95))], 1)
                 max_int = round(sorted_int[-1], 1)
 
-            if camera_manager.mode == "DUAL_CAMERA":
+            if camera_manager.mode in ("DUAL_CAMERA", "TRIPLE_CAMERA"):
                 cam_source = camera_manager.get_source(norm_source_id)
                 final_stats = cam_source.inference_slot.get_stats() if cam_source else {
                     "submitted": 0, "superseded": 0, "processed": 0, "pending": 0, "results_sent": 0, "detected_objects": 0
