@@ -12,8 +12,27 @@ Write-Host ""
 
 $PythonExe = Join-Path $RootPath ".venv\Scripts\python.exe"
 if (-not (Test-Path $PythonExe)) {
-    Write-Host "[LOI] Khong tim thay Python tai .venv\Scripts\python.exe!" -ForegroundColor Red
-    exit 1
+    Write-Host "[THONG BAO] Chua tim thay .venv tai thu muc goc. Dang tu dong tao moi..." -ForegroundColor Yellow
+    $SystemPython = (Get-Command python.exe -ErrorAction SilentlyContinue)
+    if (-not $SystemPython) {
+        Write-Host "[LOI] Khong tim thay Python tren he thong!" -ForegroundColor Red
+        Write-Host "Vui long cai dat Python 3.10+ va tich Add to PATH tu https://www.python.org/downloads/" -ForegroundColor Yellow
+        exit 1
+    }
+    python -m venv .venv
+    & $PythonExe -m pip install --upgrade pip
+    & $PythonExe -m pip install -r backend/requirements.txt
+    Write-Host "[HOAN TAT] Da khoi tao xong .venv!" -ForegroundColor Green
+    Write-Host ""
+}
+
+if (-not (Test-Path (Join-Path $RootPath "node_modules"))) {
+    $NpmCmd = (Get-Command npm.cmd -ErrorAction SilentlyContinue)
+    if ($NpmCmd) {
+        Write-Host "[INFO] Dang cai dat thu vien Frontend (npm install)..." -ForegroundColor Yellow
+        npm install
+        Write-Host ""
+    }
 }
 
 Write-Host "[1/3] Khoi dong Backend AI Engine (FastAPI tren cong 8000)..." -ForegroundColor Yellow
