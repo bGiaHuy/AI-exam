@@ -107,7 +107,12 @@ Chế độ: `PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;`
 
 ## 🚀 4. HƯỚNG DẪN CÀI ĐẶT & CHẠY HỆ THỐNG
 
-### 4.1. Khởi chạy Backend (FastAPI)
+### 4.0. Khởi chạy 1-Click tự động (Khuyến nghị cho Windows & macOS)
+- **Trên Windows:** Click đúp vào file `start.bat` (hoặc chuột phải vào `start.ps1` chọn *Run with PowerShell*). Để dừng, chạy `stop.bat`.
+- **Trên macOS / Linux:** Chạy lệnh `./start.sh` (cấp quyền lần đầu `chmod +x start.sh stop.sh`). Để dừng, nhấn `Ctrl+C` hoặc chạy `./stop.sh`.
+*(Script tự động nhận diện Python, tạo môi trường ảo `.venv`, cài đặt `backend/requirements.txt`, `npm install` và mở trình duyệt).*
+
+### 4.1. Khởi chạy Backend thủ công (FastAPI)
 ```bash
 # Tạo và kích hoạt môi trường ảo biệt lập
 uv venv .venv
